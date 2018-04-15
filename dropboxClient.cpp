@@ -15,6 +15,7 @@ int main(int argc, char **argv)
     ui_success(SUCC_ARGS, username, endereco, porta);
   }
 
+  ui_cmdline(UI_START);
   ui_success(SUCC_TERMINATE, emptymsg, emptymsg, emptymsg);
 
   return 0;

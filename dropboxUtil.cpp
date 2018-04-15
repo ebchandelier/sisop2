@@ -13,6 +13,60 @@ void ui_welcome_client(char* client_name)
   std::cout << "/________________________________________\\ \n";
 }
 
+void ui_cmdline(int ui_code)
+{
+  std::cout << "\n";
+  std::cout << "["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["CMDLINE_COLOR"CMDLINE"STANDARD_COLOR"]: ";
+
+  switch (ui_code)
+  {
+
+  case UI_START:
+    std::cout << "Welcome to Dropbox command line interface!" ;
+    ui_cmdline(UI_S_HELP);
+    ui_cmdline(UI_S_UPLOAD);
+    ui_cmdline(UI_S_DOWNLOAD);
+    ui_cmdline(UI_S_LISTSERV);
+    ui_cmdline(UI_S_LISTCLI);
+    ui_cmdline(UI_S_SYNCDIR);
+    ui_cmdline(UI_S_EXIT);
+    break;
+
+  case UI_S_HELP:
+    std::cout << "To call for help simply type: \"help\";" ;
+    break;
+
+  case UI_S_UPLOAD:
+    std::cout << "To upload a file use \"upload<path\\filename>\";" ;
+    break;
+
+  case UI_S_DOWNLOAD:
+    std::cout << "To download a file use \"download<filename.ext>\";" ;
+    break;
+
+  case UI_S_LISTSERV:
+    std::cout << "To list the serverside saved files use \"list_server\";" ;
+    break;
+
+  case UI_S_LISTCLI:
+    std::cout << "To list the clientside saved files use \"list_client\";" ;
+    break;
+
+  case UI_S_SYNCDIR:
+    std::cout << "To create the sync_dir on your home use \"get_sync_dir\";" ;
+    break;
+
+  case UI_S_EXIT:
+    std::cout << "To terminate a session use \"exit\";" ;
+    break;
+
+  default:
+    std::cout << "BAD CALL;" ;
+
+  }
+
+}
+
 void ui_success(int succ_code, std::string message1, std::string message2, std::string message3)
 {
   std::cout << "\n";
