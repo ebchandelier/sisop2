@@ -1,5 +1,5 @@
 client:
-	g++ -o dropboxClient dropboxClient.cpp
+	g++ -o dropboxClient dropboxUtil.cpp dropboxClient.cpp
 	./dropboxClient
 
 server:
