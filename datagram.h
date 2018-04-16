@@ -33,6 +33,17 @@ typedef enum
     ack
 } control_actions;
 
+typedef enum
+{
+    new_user,
+    old_user
+} user_type;
+
+typedef struct
+{
+    user_type type;
+} control_login_data;
+
 typedef struct
 {
     char filename[MAXIMUM_FILE_NAME];
@@ -41,7 +52,11 @@ typedef struct
 typedef struct
 {
     control_actions action;
-    file_info file;
+    union {
+        control_login_data login_response_data;
+        file_info file;
+    };
+
 } control_datagram;
 
 typedef struct
@@ -58,3 +73,9 @@ typedef struct
         control_datagram control;
     };
 } datagram;
+
+
+#define DATAGRAM_SIZE sizeof(datagram)
+
+
+
