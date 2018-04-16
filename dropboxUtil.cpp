@@ -1,8 +1,12 @@
 #include "dropboxUtil.h"
 
+std::string new_command;
+int command_to_main;
+bool skip_new_line;
+
 void ui_welcome_client(char* client_name)
 {
-  std::cout << "\n";
+  std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
   std::cout << "__________________________________________\n";
   std::cout << "\\                                        /\n";
   std::cout << "|            " DROPBOX_COLOR "DROPBOX" STANDARD_COLOR " [CLIENT]            |\n";
@@ -11,11 +15,16 @@ void ui_welcome_client(char* client_name)
   std::cout << "|               Bem vindo!               |\n";
   std::cout << "|                                        |\n";
   std::cout << "/________________________________________\\ \n";
+  skip_new_line = false;
 }
 
-void ui_cmdline(int ui_code)
+int ui_cmdline(int ui_code)
 {
-  std::cout << "\n";
+  if (skip_new_line)
+    skip_new_line = false;
+  else
+    std::cout << "\n";
+
   std::cout << "["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["CMDLINE_COLOR"CMDLINE"STANDARD_COLOR"]: ";
 
   switch (ui_code)
@@ -30,10 +39,11 @@ void ui_cmdline(int ui_code)
     ui_cmdline(UI_S_LISTCLI);
     ui_cmdline(UI_S_SYNCDIR);
     ui_cmdline(UI_S_EXIT);
+    ui_cmdline_input();
     break;
 
   case UI_S_HELP:
-    std::cout << "To call for help simply type: \"help\";" ;
+    std::cout << "To call for help use \"help\";" ;
     break;
 
   case UI_S_UPLOAD:
@@ -60,10 +70,65 @@ void ui_cmdline(int ui_code)
     std::cout << "To terminate a session use \"exit\";" ;
     break;
 
+  case UI_CMD_UNKNOWN:
+    std::cout << "Unrecognized command, if you need help type \"help\";" ;
+    ui_cmdline_input();
+    break;
+
+  case UI_CMD_EXIT:
+    std::cout << "User called exit, will now terminate connection;" ;
+    command_to_main = CODE_EXIT;
+    break;
+
+  case UI_CMD_HELP:
+    std::cout << "Here is the list of available commands" ;
+    ui_cmdline(UI_S_HELP);
+    ui_cmdline(UI_S_UPLOAD);
+    ui_cmdline(UI_S_DOWNLOAD);
+    ui_cmdline(UI_S_LISTSERV);
+    ui_cmdline(UI_S_LISTCLI);
+    ui_cmdline(UI_S_SYNCDIR);
+    ui_cmdline(UI_S_EXIT);
+    ui_cmdline_input();
+    break;
+
   default:
     std::cout << "BAD CALL;" ;
+    break;
 
   }
+
+  return command_to_main;
+
+}
+
+void ui_cmdline_input()
+{
+  std::cout << "\n["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["INPUT_COLOR"INPUT"STANDARD_COLOR"]: ";
+  std::cin >> new_command;
+  skip_new_line = true;
+  ui_cmd_selector(new_command);
+  return;
+
+}
+
+void ui_cmd_selector(std::string command)
+{
+
+  if (!command.compare(0, 4, CMD_HELP))
+  {
+    ui_cmdline(UI_CMD_HELP);
+    return;
+  }
+
+  if (!command.compare(0, 4, CMD_EXIT))
+  {
+    ui_cmdline(UI_CMD_EXIT);
+    return;
+  }		
+
+  ui_cmdline(UI_CMD_UNKNOWN);
+  return;
 
 }
 
@@ -100,6 +165,7 @@ void ui_success(int succ_code, std::string message1, std::string message2, std::
 
   default:
     std::cout << "BAD CALL;" ;
+    break;
 
   }
 
@@ -116,6 +182,7 @@ void ui_warn(int warn_code, std::string message1, std::string message2, std::str
 
   default:
     std::cout << "BAD CALL;" ;
+    break;
 
   }
 
@@ -142,6 +209,7 @@ void ui_error(int err_code, std::string message1, std::string message2, std::str
 
   default:
     std::cout << "BAD CALL;" ;
+    break;
 
   }
 

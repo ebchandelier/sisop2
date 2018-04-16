@@ -7,6 +7,7 @@ std::string username;
 std::string endereco;
 std::string porta;
 std::string emptymsg;
+int command;
 
 //Estabelece uma sessão entre o cliente com o servidor.
 int login_server(char* host, int port);
@@ -25,6 +26,9 @@ void delete_file(char* file);
 
 //Fecha a sessão com o servidor.
 void close_session();
+
+//Recebe codigo e executa comando
+void command_solver(int command);
 
 //Valida tamanho do usuario
 void set_username(char* name);
