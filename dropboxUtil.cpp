@@ -2,6 +2,7 @@
 
 std::string new_command;
 int command_to_main;
+std::string input_parameter;
 bool skip_new_line;
 
 void ui_welcome_client(char* client_name)
@@ -47,11 +48,11 @@ int ui_cmdline(int ui_code)
     break;
 
   case UI_S_UPLOAD:
-    std::cout << "To upload a file use \"upload<path\\filename>\";" ;
+    std::cout << "To upload a file use \"upload <path\\filename>\";" ;
     break;
 
   case UI_S_DOWNLOAD:
-    std::cout << "To download a file use \"download<filename.ext>\";" ;
+    std::cout << "To download a file use \"download <filename.ext>\";" ;
     break;
 
   case UI_S_LISTSERV:
@@ -75,11 +76,6 @@ int ui_cmdline(int ui_code)
     ui_cmdline_input();
     break;
 
-  case UI_CMD_EXIT:
-    std::cout << "User called exit, will now terminate connection;" ;
-    command_to_main = CODE_EXIT;
-    break;
-
   case UI_CMD_HELP:
     std::cout << "Here is the list of available commands" ;
     ui_cmdline(UI_S_HELP);
@@ -89,6 +85,31 @@ int ui_cmdline(int ui_code)
     ui_cmdline(UI_S_LISTCLI);
     ui_cmdline(UI_S_SYNCDIR);
     ui_cmdline(UI_S_EXIT);
+    ui_cmdline_input();
+    break;
+
+  case UI_CMD_UPLOAD:
+    break;
+
+  case UI_CMD_DOWNLOAD:
+    break;
+
+  case UI_CMD_LISTSERV:
+    break;
+
+  case UI_CMD_LISTCLI:
+    break;
+
+  case UI_CMD_SYNCDIR:
+    break;
+
+  case UI_CMD_EXIT:
+    std::cout << "User called exit, will now terminate connection;" ;
+    command_to_main = CODE_EXIT;
+    break;
+
+  case UI_MISSING_PAR:
+    std::cout << "No filename provided. Please, when using upload and download input filename after the command;" ;
     ui_cmdline_input();
     break;
 
@@ -115,13 +136,47 @@ void ui_cmdline_input()
 void ui_cmd_selector(std::string command)
 {
 
-  if (!command.compare(0, 4, CMD_HELP))
+  if (!command.compare(CMD_HELP))
   {
     ui_cmdline(UI_CMD_HELP);
     return;
   }
 
-  if (!command.compare(0, 4, CMD_EXIT))
+  if (!command.compare(0, 6, CMD_UPLOAD))
+  {
+    if (command.size() <= 8)
+      ui_cmdline(UI_MISSING_PAR);
+    ui_cmdline(UI_CMD_UPLOAD);      
+    return;
+  }
+
+  if (!command.compare(0, 8, CMD_DOWNLOAD))
+  {
+    if (command.size() <= 10)
+      ui_cmdline(UI_MISSING_PAR);
+    ui_cmdline(UI_CMD_DOWNLOAD);      
+    return;
+  }
+
+  if (!command.compare(CMD_LISTSERV))
+  {
+    ui_cmdline(UI_CMD_LISTSERV);      
+    return;
+  }
+
+  if (!command.compare(CMD_LISTCLI))
+  {
+    ui_cmdline(UI_CMD_LISTCLI);      
+    return;
+  }
+
+  if (!command.compare(CMD_SYNCDIR))
+  {
+    ui_cmdline(UI_CMD_SYNCDIR);      
+    return;
+  }
+
+  if (!command.compare(CMD_EXIT))
   {
     ui_cmdline(UI_CMD_EXIT);
     return;

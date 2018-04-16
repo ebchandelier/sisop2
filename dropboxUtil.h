@@ -28,11 +28,23 @@
 #define UI_CMD_LISTCLI	226
 #define UI_CMD_SYNCDIR	227
 #define UI_CMD_EXIT	228
+#define UI_MISSING_PAR	230
 
 #define CMD_HELP	"help"
+#define CMD_UPLOAD	"upload"
+#define CMD_DOWNLOAD	"download"
+#define CMD_LISTSERV	"list_server"
+#define CMD_LISTCLI	"list_client"
+#define CMD_SYNCDIR	"get_sync_dir"
 #define CMD_EXIT	"exit"
 
-#define CODE_EXIT	501
+#define CODE_HELP	302
+#define CODE_UPLOAD	303
+#define CODE_DOWNLOAD	304
+#define CODE_LISTSERV	305
+#define CODE_LISTCLI	306
+#define CODE_SYNCDIR	307
+#define CODE_EXIT	308
 
 #define ERROR_COLOR	"\x1b[31m"
 #define DROPBOX_COLOR	"\x1b[34m"
