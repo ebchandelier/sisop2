@@ -31,9 +31,12 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 	}
+	
 	printf("Initializing UDP stack");
     ServerConnectorUDP connector = ServerConnectorUDP();
 	connector.init(port);
-
-	connector.receive_next_package();
+	while(true)
+	{
+		connector.receive_next_package();
+	}
 }

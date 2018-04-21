@@ -1,4 +1,5 @@
 #include "dropboxUtil.h"
+#include "ClientConnectionManager.h"
 #include <string>
 
 #define MAXNAME		50

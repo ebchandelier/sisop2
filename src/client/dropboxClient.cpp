@@ -15,9 +15,15 @@ int main(int argc, char **argv)
     ui_success(SUCC_ARGS, username, endereco, porta);
   }
 
+  ClientConnectionManager manager = ClientConnectionManager();
+
+  manager.login_server(argv[2], atoi(porta.c_str()));
+
+
+/*
   command = ui_cmdline(UI_START);
   command_solver(command);
-
+*/
   return 0;
 }
 

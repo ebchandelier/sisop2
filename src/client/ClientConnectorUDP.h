@@ -6,6 +6,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <stdio.h>
+#pragma once
 #include <string>
 
 class ClientConnectorUDP
