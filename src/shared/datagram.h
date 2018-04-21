@@ -1,14 +1,15 @@
+#pragma once
 #include <stdint.h>
 #define DATA_BUFFER_SIZE 1400
 #define MAXIMUM_FILE_NAME 100
 
-typedef enum
+enum class datagram_type
 {
     control,
     data
-} datagram_type;
+};
 
-typedef enum
+enum class control_actions
 {
     request_exclude,
     accept_exclude,
@@ -31,13 +32,13 @@ typedef enum
     deny_login,
 
     ack
-} control_actions;
+};
 
-typedef enum
+enum class user_type
 {
     new_user,
     old_user
-} user_type;
+};
 
 typedef struct
 {

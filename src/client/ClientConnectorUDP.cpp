@@ -29,22 +29,21 @@ void ClientConnectorUDP::connect(std::string server_name, int port)
 	bzero(&(serv_addr.sin_zero), 8); 
 }
 
-void ClientConnectorUDP::send_package()
+void ClientConnectorUDP::send_package(datagram package)
 {
-	char buffer[256];
-	int n = sendto(sockfd, buffer, strlen(buffer), 0, (const struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in));
+	int n = sendto(sockfd, &package, DATAGRAM_SIZE, 0, (const struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in));
 	if (n < 0)
 	{
 		printf("ERROR sendto");
 	}
 }
 
-void ClientConnectorUDP::receive_package()
+datagram ClientConnectorUDP::receive_package()
 {
-	char buffer[256];
-	unsigned int length = 256;
+	datagram package;
+	unsigned int length;
 	struct sockaddr_in from;
-	int n = recvfrom(sockfd, buffer, 256, 0, (struct sockaddr *) &from, &length);
+	int n = recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &from, &length);
 	if (n < 0)
 	{
 		printf("ERROR recvfrom");

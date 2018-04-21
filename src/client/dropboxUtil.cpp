@@ -26,7 +26,7 @@ int ui_cmdline(int ui_code)
   else
     std::cout << "\n";
 
-  std::cout << "["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["CMDLINE_COLOR"CMDLINE"STANDARD_COLOR"]: ";
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" CMDLINE_COLOR "CMDLINE" STANDARD_COLOR "]: ";
 
   switch (ui_code)
   {
@@ -125,7 +125,7 @@ int ui_cmdline(int ui_code)
 
 void ui_cmdline_input()
 {
-  std::cout << "\n["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["INPUT_COLOR"INPUT"STANDARD_COLOR"]: ";
+  std::cout << "\n[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" INPUT_COLOR "INPUT" STANDARD_COLOR "]: ";
   std::cin >> new_command;
   skip_new_line = true;
   ui_cmd_selector(new_command);
@@ -190,7 +190,7 @@ void ui_cmd_selector(std::string command)
 void ui_success(int succ_code, std::string message1, std::string message2, std::string message3)
 {
   std::cout << "\n";
-  std::cout << "["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["SUCCESS_COLOR"SUCCESS"STANDARD_COLOR"]: ";
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" SUCCESS_COLOR "SUCCESS" STANDARD_COLOR "]: ";
 
   switch (succ_code)
   {
@@ -230,7 +230,7 @@ void ui_success(int succ_code, std::string message1, std::string message2, std::
 void ui_warn(int warn_code, std::string message1, std::string message2, std::string message3)
 {
   std::cout << "\n";
-  std::cout << "["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["WARNING_COLOR"WARNING"STANDARD_COLOR"]: ";
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" WARNING_COLOR "WARNING" STANDARD_COLOR "]: ";
 
   switch (warn_code)
   {
@@ -247,7 +247,7 @@ void ui_warn(int warn_code, std::string message1, std::string message2, std::str
 void ui_error(int err_code, std::string message1, std::string message2, std::string message3)
 {
   std::cout << "\n";
-  std::cout << "["DROPBOX_COLOR"DboxClient"STANDARD_COLOR"]["ERROR_COLOR"ERROR"STANDARD_COLOR"]: " ;
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" ERROR_COLOR "ERROR" STANDARD_COLOR "]: " ;
 
   switch (err_code)
   {

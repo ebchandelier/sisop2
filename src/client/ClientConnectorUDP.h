@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #pragma once
+#include "../shared/datagram.h"
 #include <string>
 
 class ClientConnectorUDP
@@ -14,9 +15,9 @@ class ClientConnectorUDP
 public:
 	void connect(std::string server_name, int port);
 
-	void send_package();
+	void send_package(datagram package);
 
-	void receive_package();
+	datagram receive_package();
 
 	void close();
 

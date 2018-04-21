@@ -1,9 +1,10 @@
 #pragma once
 #include "ClientConnectorUDP.h"
+#include "../shared/datagram.h"
 class ClientConnectionManager
 {
 public:
-    int	login_server(char* host, int port);
+    int login_server(char* host, int port);
     void sync_client();
     void send_file(char* file);
     void get_file(char* file);
