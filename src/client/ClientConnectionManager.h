@@ -1,6 +1,7 @@
 #pragma once
 #include "ClientConnectorUDP.h"
 #include "../shared/datagram.h"
+#include "../shared/DatagramStringifier.h"
 class ClientConnectionManager
 {
 public:

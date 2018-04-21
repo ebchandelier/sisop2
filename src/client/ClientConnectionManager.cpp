@@ -13,6 +13,7 @@ int	ClientConnectionManager::login_server(char* host, int port)
     connector.send_package(login_request);
     datagram response = connector.receive_package();
 
+    printf("Got login response:\n%s\n", DatagramStringifier().stringify(response).c_str());
     if (response.type == datagram_type::control)
     {
         if (response.control.action == control_actions::accept_login)

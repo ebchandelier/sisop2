@@ -15,7 +15,7 @@ std::string DatagramStringifier::stringify(datagram package)
     }
     else
     {
-        out += "corrupted";
+        out += "corrupted (" + std::to_string((int)package.type) + ")";
     }
     out += "\"\n";
 

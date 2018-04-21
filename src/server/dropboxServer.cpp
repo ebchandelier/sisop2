@@ -42,5 +42,16 @@ int main(int argc, char **argv)
 	{
 		auto package = connector.receive_next_package();
 		printf("Package received:\n%s\n", stringifier.stringify(package).c_str());
+
+		if (package.type == datagram_type::control)
+		{
+			if (package.control.action == control_actions::request_login)
+			{
+				datagram login_response;
+				login_response.type = datagram_type::control;
+				login_response.control.action = control_actions::accept_login;
+				connector.send_package(login_response);
+			}
+		}
 	}
 }

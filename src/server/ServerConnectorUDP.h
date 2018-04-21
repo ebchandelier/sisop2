@@ -19,7 +19,7 @@ public:
 
 	datagram receive_next_package();
 
-	void send_package();
+	void send_package(datagram package);
 
 	void close();
 
