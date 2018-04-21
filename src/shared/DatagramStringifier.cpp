@@ -5,17 +5,16 @@ std::string DatagramStringifier::stringify(datagram package)
     std::string out;
 
     out += "Type: \"";
-    if (package.type == datagram_type::control)
+    switch(package.type)
     {
-        out += "control";
-    }
-    else if (package.type == datagram_type::data) 
-    {
-        out += "data";
-    }
-    else
-    {
-        out += "corrupted (" + std::to_string((int)package.type) + ")";
+        case datagram_type::control:
+            out += "control";
+            break;
+        case datagram_type::data:
+            out += "data";
+            break;
+        default:
+            out += "corrupted (" + std::to_string((int)package.type) + ")";
     }
     out += "\"\n";
 
@@ -31,9 +30,12 @@ std::string DatagramStringifier::stringify(datagram package)
             case control_actions::deny_login:
                 out += "deny_login";
                 break;
+            case control_actions::accept_login:
+                out += "accept_login";
+                break;
             // TODO: Add the others
             default:
-                out += "corrupted";
+                out += "corrupted (" + std::to_string((int)action) + ")";
         }
         out += "\"\n";
     }
