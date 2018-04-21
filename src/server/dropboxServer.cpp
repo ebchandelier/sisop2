@@ -1,4 +1,5 @@
 #include "ServerConnectorUDP.h"
+#include "../shared/DatagramStringifier.h"
 
 int main(int argc, char **argv)
 {
@@ -32,11 +33,14 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	printf("Initializing UDP stack");
+	printf("Initializing UDP stack...\n");
     ServerConnectorUDP connector = ServerConnectorUDP();
 	connector.init(port);
+	auto stringifier = DatagramStringifier();
+	printf("Done. Waiting for packages:\n");
 	while(true)
 	{
-		connector.receive_next_package();
+		auto package = connector.receive_next_package();
+		printf("Package received:\n%s\n", stringifier.stringify(package).c_str());
 	}
 }

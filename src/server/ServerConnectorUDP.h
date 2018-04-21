@@ -9,13 +9,15 @@
 #include <netdb.h>
 #include <stdio.h>
 
+#include "../shared/datagram.h"
+
 
 class ServerConnectorUDP
 {
 public:
 	void init(int port);
 
-	void receive_next_package();
+	datagram receive_next_package();
 
 	void send_package();
 
