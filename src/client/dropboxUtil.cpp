@@ -1,4 +1,4 @@
-#include "dropboxUtil.h"
+#include "./dropboxUtil.h"
 
 std::string new_command;
 int command_to_main;

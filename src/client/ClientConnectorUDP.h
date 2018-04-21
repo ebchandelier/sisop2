@@ -10,9 +10,17 @@
 
 class ClientConnectorUDP
 {
-	void connect(std::string server, int port);
+public:
+	void connect(std::string server_name, int port);
 
 	void send_package();
 
 	void receive_package();
+
+	void close();
+
+private:
+	int sockfd;
+
+	struct sockaddr_in serv_addr, cli_addr;
 };
