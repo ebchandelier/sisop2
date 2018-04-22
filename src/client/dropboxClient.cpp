@@ -15,16 +15,46 @@ int main(int argc, char **argv)
     ui_success(SUCC_ARGS, username, endereco, porta);
   }
 
+/*
   ClientConnectionManager manager = ClientConnectionManager();
 
   manager.login_server(argv[2], atoi(porta.c_str()));
+*/
 
+  login_server(endereco, atoi(porta));
 
-/*
   command = ui_cmdline(UI_START);
   command_solver(command);
-*/
+
   return 0;
+}
+
+int login_server(char* host, int port)
+{
+  if (true)
+  {
+    ui_success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
+    return LOGIN_TRUE;
+  } else {
+    ui_error(ERR_LOGIN_CONN, emptymsg, emptymsg, emptymsg);
+    return LOGIN_FALSE;
+  }
+}
+
+void sync_client()
+{
+}
+
+void send_file(char* file)
+{
+}
+
+void get_file(char* file)
+{
+}
+
+void delete_file(char* file)
+{
 }
 
 void close_session()
@@ -38,6 +68,26 @@ void command_solver(int command)
 
   switch (command)
   {
+
+  case CODE_UPLOAD:
+    //send_file();
+    break;
+
+  case CODE_DOWNLOAD:
+    //get_file();
+    break;
+
+  case CODE_LISTSERV:
+    //close_session();
+    break;
+
+  case CODE_LISTCLI:
+    //close_session();
+    break;
+
+  case CODE_SYNCDIR:
+    //sync_client();
+    break;
 
   case CODE_EXIT:
     close_session();

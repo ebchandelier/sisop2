@@ -2,6 +2,8 @@
 #include "ClientConnectorUDP.h"
 #include "../shared/datagram.h"
 #include "../shared/DatagramStringifier.h"
+#include "dropboxUtil.h"
+
 class ClientConnectionManager
 {
 public:

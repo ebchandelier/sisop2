@@ -89,18 +89,23 @@ int ui_cmdline(int ui_code)
     break;
 
   case UI_CMD_UPLOAD:
+    command_to_main = CODE_UPLOAD;
     break;
 
   case UI_CMD_DOWNLOAD:
+    command_to_main = CODE_DOWNLOAD;
     break;
 
   case UI_CMD_LISTSERV:
+    command_to_main = CODE_LISTSERV;
     break;
 
   case UI_CMD_LISTCLI:
+    command_to_main = CODE_LISTCLI;
     break;
 
   case UI_CMD_SYNCDIR:
+    command_to_main = CODE_SYNCDIR;
     break;
 
   case UI_CMD_EXIT:
@@ -214,6 +219,10 @@ void ui_success(int succ_code, std::string message1, std::string message2, std::
     std::cout << "Port:  " << message3 << ";" ;
     break;
 
+  case SUCC_LOGIN:
+    std::cout << "You connected successfully to the server.";
+    break;
+
   case SUCC_TERMINATE:
     std::cout << "Thank you. Dropbox will now terminate.\n\n";
     break;
@@ -230,10 +239,13 @@ void ui_success(int succ_code, std::string message1, std::string message2, std::
 void ui_warn(int warn_code, std::string message1, std::string message2, std::string message3)
 {
   std::cout << "\n";
-  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" WARNING_COLOR "WARNING" STANDARD_COLOR "]: ";
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" WARNING_COLOR "WARNING" STANDARD_COLOR "]: " ;
 
   switch (warn_code)
   {
+
+  case WAR_LOGIN_SESS:
+    std::cout << "There is already the maximum of two sessions of this client connected to the server." ;
 
   default:
     std::cout << "BAD CALL;" ;
@@ -256,6 +268,10 @@ void ui_error(int err_code, std::string message1, std::string message2, std::str
     std::cout << "Wrong number of arguments, please use: ./dropboxClient user endereco porta;" ;
     ui_error(ERR_TERMINATE, message1, message2, message3);
     exit(ERR_NOFARGS);
+    break;
+
+  case ERR_LOGIN_CONN:
+    std::cout << "Could not establish connection to the server." ;
     break;
 
   case ERR_TERMINATE:

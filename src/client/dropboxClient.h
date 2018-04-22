@@ -4,10 +4,15 @@
 
 #define MAXNAME		50
 
+#define LOGIN_TRUE	1
+#define LOGIN_FALSE	0
+
 std::string username;
-std::string endereco;
-std::string porta;
+char* endereco;
+char* porta;
+
 std::string emptymsg;
+
 int command;
 
 //Estabelece uma sessão entre o cliente com o servidor.

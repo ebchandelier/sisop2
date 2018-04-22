@@ -7,9 +7,14 @@
 #define SUCC_ARG1	101
 #define SUCC_ARG2	102
 #define SUCC_ARG3	103
+#define SUCC_LOGIN	104
 #define SUCC_TERMINATE	199
 
+#define WAR_LOGIN_SESS	-204
+
 #define ERR_NOFARGS	-1
+#define ERR_LOGIN_CONN	-104
+#define ERR_LOGIN_RESP  -105
 #define ERR_TERMINATE	-199
 
 #define UI_START	200
