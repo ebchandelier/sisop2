@@ -1,4 +1,4 @@
-#include "dropboxUtil.h"
+#include "ClientUI.h"
 #include "ClientConnectionManager.h"
 #include <string>
 
@@ -8,6 +8,7 @@
 #define LOGIN_FALSE	0
 
 ClientConnectionManager manager;
+ClientUI ui;
 std::string username;
 char* endereco;
 char* porta;

@@ -3,21 +3,23 @@
 int main(int argc, char **argv)
 {
 
-  ui_welcome_client(argv[1]);
+  ui.welcome_client(argv[1]);
 
   if (argc!=4)
-    ui_error(ERR_NOFARGS, emptymsg, emptymsg, emptymsg);
+  {
+    ui.error(ERR_NOFARGS, emptymsg, emptymsg, emptymsg);
+  }
   else
   {
     set_username(argv[1]);
     set_endereco(argv[2]);
     set_porta(argv[3]);
-    ui_success(SUCC_ARGS, username, endereco, porta);
+    ui.success(SUCC_ARGS, username, endereco, porta);
   }
 
   login_server(endereco, atoi(porta));
 
-  command = ui_cmdline(UI_START);
+  command = ui.cmdline(UI_START);
   command_solver(command);
 
   return 0;
@@ -28,10 +30,12 @@ int login_server(char* host, int port)
   int result = manager.login_server(host, port);
   if (result == 0)
   {
-    ui_success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
+    ui.success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
     return LOGIN_TRUE;
-  } else {
-    ui_error(ERR_LOGIN_CONN, emptymsg, emptymsg, emptymsg);
+  } 
+  else 
+  {
+    ui.error(ERR_LOGIN_CONN, emptymsg, emptymsg, emptymsg);
     return LOGIN_FALSE;
   }
 }
@@ -54,7 +58,7 @@ void delete_file(char* file)
 
 void close_session()
 {
-  ui_success(SUCC_TERMINATE, emptymsg, emptymsg, emptymsg);
+  ui.success(SUCC_TERMINATE, emptymsg, emptymsg, emptymsg);
   return;
 }
 
@@ -89,7 +93,7 @@ void command_solver(int command)
     break;
 
   default:
-    ui_cmdline_input();
+    ui.cmdline_input();
     break;
 
   }
@@ -101,7 +105,9 @@ void command_solver(int command)
 void set_username(char* arg)
 {
   if (sizeof(arg) <= MAXNAME)
+  {
     username = arg;
+  }
   return;
 }
 
