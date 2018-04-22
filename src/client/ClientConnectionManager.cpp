@@ -46,7 +46,7 @@ void ClientConnectionManager::delete_file(char* file)
 {
 
 }
-int ClientConnectionManager::close_session()
+int ClientConnectionManager::logout()
 {
     printf("\nLogging out...\n");
     // Build logout request package

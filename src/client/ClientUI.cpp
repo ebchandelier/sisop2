@@ -233,24 +233,26 @@ void ClientUI::success(int succ_code, std::string message1, std::string message2
   return;
 }
 
-void ClientUI::warning(int warn_code, std::string message1, std::string message2, std::string message3)
+
+void ClientUI::warning(std::string message)
 {
   std::cout << "\n";
   std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" WARNING_COLOR "WARNING" STANDARD_COLOR "]: " ;
+  std::cout << message;
+}
 
+void ClientUI::warning(int warn_code, std::string message1, std::string message2, std::string message3)
+{
   switch (warn_code)
   {
-
   case WAR_LOGIN_SESS:
-    std::cout << "There is already the maximum of two sessions of this client connected to the server." ;
-
-  default:
-    std::cout << "BAD CALL;" ;
+    warning("There is already the maximum of two sessions of this client connected to the server.");
     break;
 
+  default:
+    warning("BAD CALL;");
+    break;
   }
-
-  return;
 }
 
 void ClientUI::error(int err_code, std::string message1, std::string message2, std::string message3)

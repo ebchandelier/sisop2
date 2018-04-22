@@ -80,6 +80,7 @@ public:
     void success(int succ_code, std::string message1, std::string message2, std::string message3);
 
     //Mensagens de aviso em geral
+    void warning(std::string message);
     void warning(int warn_code, std::string message1, std::string message2, std::string message3);
 
     //Mensagem de erros em geral

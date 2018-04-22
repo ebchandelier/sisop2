@@ -58,8 +58,15 @@ void delete_file(char* file)
 
 void close_session()
 {
-  ui.success(SUCC_TERMINATE, emptymsg, emptymsg, emptymsg);
-  return;
+  auto response = manager.logout();
+  if (response == 0)
+  {
+    ui.success(SUCC_TERMINATE, emptymsg, emptymsg, emptymsg);
+  }
+  else
+  {
+    ui.warning("Server did not acknowledged the logout");
+  }
 }
 
 void command_solver(int command)

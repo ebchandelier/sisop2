@@ -12,7 +12,7 @@ public:
     void send_file(char* file);
     void get_file(char* file);
     void delete_file(char* file);
-    int close_session();
+    int logout();
 
 private:
 
