@@ -40,8 +40,10 @@ int main(int argc, char **argv)
 	printf("Done. Waiting for packages:\n");
 	while(true)
 	{
-		auto package = connector.receive_next_package();
-		printf("Package received:\n%s\n", stringifier.stringify(package).c_str());
+		auto package_and_addr = connector.receive_next_package_and_addr();
+		auto package = package_and_addr.first;
+		auto addr = package_and_addr.second;
+		printf("Received package from %d:\n%s\n", addr.sin_addr.s_addr, stringifier.stringify(package).c_str());
 
 		if (package.type == datagram_type::control)
 		{
@@ -50,7 +52,8 @@ int main(int argc, char **argv)
 				datagram login_response;
 				login_response.type = datagram_type::control;
 				login_response.control.action = control_actions::accept_login;
-				connector.send_package(login_response);
+				printf("Sending package:\n%s\n", stringifier.stringify(login_response).c_str());
+				connector.send_package(login_response, addr);
 			}
 		}
 	}

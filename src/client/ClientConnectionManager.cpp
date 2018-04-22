@@ -2,7 +2,7 @@
 
 int	ClientConnectionManager::login_server(char* host, int port)
 {
-    printf("Connection to server...\n");
+    printf("\nConnection to server...\n");
     connector.connect(host, port);
 
     // Build login request package
@@ -18,16 +18,16 @@ int	ClientConnectionManager::login_server(char* host, int port)
     {
         if (response.control.action == control_actions::accept_login)
         {
-            printf("Login accepted");
+            printf("Login accepted\n");
             return 0;
         }
         else if (response.control.action == control_actions::deny_login)
         {
-            printf("Login denied");
+            printf("Login denied\n");
             return -1;
         }
     }
-    printf("Unknown response");
+    printf("Unknown response\n");
     return -1;
 }
 void ClientConnectionManager::sync_client()
@@ -46,7 +46,30 @@ void ClientConnectionManager::delete_file(char* file)
 {
 
 }
-void ClientConnectionManager::close_session()
+int ClientConnectionManager::close_session()
 {
+    printf("\nLogging out...\n");
+    // Build logout request package
+    datagram logout_request;
+    logout_request.type = datagram_type::control;
+    logout_request.control.action = control_actions::request_logout;
 
+<<<<<<< HEAD
 }
+=======
+    connector.send_package(logout_request);
+    datagram response = connector.receive_package();
+
+    printf("Got logout response:\n%s\n", DatagramStringifier().stringify(response).c_str());
+    if (response.type == datagram_type::control)
+    {
+        if (response.control.action == control_actions::accept_logout)
+        {
+            printf("Logout successful\n");
+            return 0;
+        }
+    }
+    printf("Unknown response\n");
+    return -1;
+}
+>>>>>>> aa2c544acb40ed1775d12ef5019edf1c7d2ccdad
