@@ -5,12 +5,13 @@
 class ClientConnectionManager
 {
 public:
+    // Tries to connect to the server. Returns -1 on error and 0 on success
     int login_server(char* host, int port);
     void sync_client();
     void send_file(char* file);
     void get_file(char* file);
     void delete_file(char* file);
-    void close_session();
+    int close_session();
 
 private:
 

@@ -13,12 +13,17 @@
 class ClientConnectorUDP
 {
 public:
+
+	// Initializes an UDP connection with the server
 	void connect(std::string server_name, int port);
 
+	// Blocking send package to the server
 	void send_package(datagram package);
 
+	// Blocking get package from the server
 	datagram receive_package();
 
+	// Closes this UDP connection
 	void close();
 
 private:

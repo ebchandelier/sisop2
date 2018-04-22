@@ -31,6 +31,9 @@ enum class control_actions
     accept_login,
     deny_login,
 
+    request_logout,
+    accept_logout,
+
     ack
 };
 

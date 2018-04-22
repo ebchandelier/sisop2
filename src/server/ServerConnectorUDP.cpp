@@ -3,7 +3,6 @@
 
 void ServerConnectorUDP::init(int port)
 {
-	
 	// Open socket
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd == -1)
@@ -27,16 +26,16 @@ void ServerConnectorUDP::init(int port)
 	clilen = sizeof(struct sockaddr_in);
 }
 
-void ServerConnectorUDP::send_package(datagram package)
+void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr)
 {
-	n = sendto(sockfd, &package, DATAGRAM_SIZE, 0,(struct sockaddr *) &cli_addr, sizeof(struct sockaddr));
+	n = sendto(sockfd, &package, DATAGRAM_SIZE, 0,(struct sockaddr *) &addr, sizeof(struct sockaddr));
 	if (n < 0)
 	{
 		printf("ERROR on sendto");
 	}
 }
 
-datagram ServerConnectorUDP::receive_next_package()
+std::pair<datagram, sockaddr_in> ServerConnectorUDP::receive_next_package_and_addr()
 {
 	datagram package;
 	int n = recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &cli_addr, &clilen);
@@ -44,7 +43,7 @@ datagram ServerConnectorUDP::receive_next_package()
 	{
 		printf("ERROR on recvfrom");
 	}
-	return package;
+	return std::make_pair(package, cli_addr);
 }
 
 void ServerConnectorUDP::close()

@@ -46,7 +46,26 @@ void ClientConnectionManager::delete_file(char* file)
 {
 
 }
-void ClientConnectionManager::close_session()
+int ClientConnectionManager::close_session()
 {
+    printf("\nLogging out...\n");
+    // Build logout request package
+    datagram logout_request;
+    logout_request.type = datagram_type::control;
+    logout_request.control.action = control_actions::request_logout;
 
+    connector.send_package(logout_request);
+    datagram response = connector.receive_package();
+
+    printf("Got logout response:\n%s\n", DatagramStringifier().stringify(response).c_str());
+    if (response.type == datagram_type::control)
+    {
+        if (response.control.action == control_actions::accept_logout)
+        {
+            printf("Logout successful\n");
+            return 0;
+        }
+    }
+    printf("Unknown response\n");
+    return -1;
 }
