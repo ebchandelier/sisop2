@@ -66,7 +66,7 @@ typedef struct
 typedef struct
 {
     // How many bytes are actual data on the buffer
-    uint32_t data_lenght;
+    uint32_t data_length;
     // Buffer holding the data
     char buffer[DATA_BUFFER_SIZE];
     uint32_t package_id;
