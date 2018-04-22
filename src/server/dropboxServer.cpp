@@ -50,6 +50,7 @@ int main(int argc, char **argv)
 				datagram login_response;
 				login_response.type = datagram_type::control;
 				login_response.control.action = control_actions::accept_login;
+				printf("Sending package:\n%s\n", stringifier.stringify(login_response).c_str());
 				connector.send_package(login_response);
 			}
 		}

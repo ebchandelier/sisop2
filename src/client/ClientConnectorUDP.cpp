@@ -2,10 +2,6 @@
 
 void ClientConnectorUDP::connect(std::string server_name, int port)
 {
-	socklen_t clilen;
-	struct hostent *server;
-	char buf[256];
-
 	// Get server
 	server = gethostbyname(server_name.c_str());
 	if (server == NULL) 
@@ -41,13 +37,13 @@ void ClientConnectorUDP::send_package(datagram package)
 datagram ClientConnectorUDP::receive_package()
 {
 	datagram package;
-	unsigned int length;
-	struct sockaddr_in from;
-	int n = recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &from, &length);
+	length = sizeof(struct sockaddr_in);
+	n = recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &from, &length);
 	if (n < 0)
 	{
 		printf("ERROR recvfrom");
 	}
+	return package;
 }
 
 void ClientConnectorUDP::close()

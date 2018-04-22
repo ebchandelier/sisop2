@@ -22,7 +22,8 @@ public:
 	void close();
 
 private:
-	int sockfd;
-
-	struct sockaddr_in serv_addr, cli_addr;
+    int sockfd, n;
+	unsigned int length;
+	struct sockaddr_in serv_addr, from;
+	struct hostent *server;
 };

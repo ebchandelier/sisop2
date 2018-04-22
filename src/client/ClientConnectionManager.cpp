@@ -2,7 +2,7 @@
 
 int	ClientConnectionManager::login_server(char* host, int port)
 {
-    printf("Connection to server...\n");
+    printf("\nConnection to server...\n");
     connector.connect(host, port);
 
     // Build login request package
@@ -18,16 +18,16 @@ int	ClientConnectionManager::login_server(char* host, int port)
     {
         if (response.control.action == control_actions::accept_login)
         {
-            printf("Login accepted");
+            printf("Login accepted\n");
             return 0;
         }
         else if (response.control.action == control_actions::deny_login)
         {
-            printf("Login denied");
+            printf("Login denied\n");
             return -1;
         }
     }
-    printf("Unknown response");
+    printf("Unknown response\n");
     return -1;
 }
 void ClientConnectionManager::sync_client()
