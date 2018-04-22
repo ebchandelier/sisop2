@@ -7,6 +7,7 @@
 #define LOGIN_TRUE	1
 #define LOGIN_FALSE	0
 
+ClientConnectionManager manager;
 std::string username;
 char* endereco;
 char* porta;

@@ -54,9 +54,6 @@ int ClientConnectionManager::close_session()
     logout_request.type = datagram_type::control;
     logout_request.control.action = control_actions::request_logout;
 
-<<<<<<< HEAD
-}
-=======
     connector.send_package(logout_request);
     datagram response = connector.receive_package();
 
@@ -72,4 +69,4 @@ int ClientConnectionManager::close_session()
     printf("Unknown response\n");
     return -1;
 }
->>>>>>> aa2c544acb40ed1775d12ef5019edf1c7d2ccdad
+

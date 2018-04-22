@@ -15,12 +15,6 @@ int main(int argc, char **argv)
     ui_success(SUCC_ARGS, username, endereco, porta);
   }
 
-/*
-  ClientConnectionManager manager = ClientConnectionManager();
-
-  manager.login_server(argv[2], atoi(porta.c_str()));
-*/
-
   login_server(endereco, atoi(porta));
 
   command = ui_cmdline(UI_START);
@@ -31,7 +25,8 @@ int main(int argc, char **argv)
 
 int login_server(char* host, int port)
 {
-  if (true)
+  int result = manager.login_server(host, port);
+  if (result == 0)
   {
     ui_success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
     return LOGIN_TRUE;
