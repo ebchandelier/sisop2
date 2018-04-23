@@ -1,5 +1,11 @@
+#include <map>
+#include <thread>
 #include "ServerConnectorUDP.h"
 #include "../shared/DatagramStringifier.h"
+#include "ClientHandler.h"
+#include "ThreadSafeQueue.h"
+
+#define MAXIMUM_PACKAGES_QUEUE_SIZE 50
 
 int main(int argc, char **argv)
 {
@@ -32,7 +38,11 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 	}
-	
+
+
+
+	std::map<uint32_t, std::pair<ClientHandler, ThreadSafeQueue<datagram>>> handlers;
+
 	printf("Initializing UDP stack...\n");
     ServerConnectorUDP connector = ServerConnectorUDP();
 	connector.init(port);
@@ -43,8 +53,30 @@ int main(int argc, char **argv)
 		auto package_and_addr = connector.receive_next_package_and_addr();
 		auto package = package_and_addr.first;
 		auto addr = package_and_addr.second;
-		printf("Received package from %d:\n%s\n", addr.sin_addr.s_addr, stringifier.stringify(package).c_str());
+		auto client_id = addr.sin_addr.s_addr;
+		printf("Received package from %d:\n%s\n", client_id, stringifier.stringify(package).c_str());
+		// If this is a package from a new client
+		if (handlers.count(client_id) == 0)
+		{
+			// Create a handler for it
+			handlers.emplace(client_id, std::make_pair(ClientHandler(), ThreadSafeQueue<datagram>(MAXIMUM_PACKAGES_QUEUE_SIZE)));
+			
+			// And start it in a new thread
+			std::thread([&handlers, client_id]() {
+				auto& queue = handlers.at(client_id).second;
+				auto& handler = handlers.at(client_id).first;
+				handler.run(queue);
+			}).detach();
+			
+		}
+		// Otherwise, dispatch the package to the correct queue
+		else
+		{
+			auto& queue = handlers.at(client_id).second;
+			queue.produce(package);
+		}
 
+		// TODO: Move this to ClientHandler.run()
 		if (package.type == datagram_type::control)
 		{
 			if (package.control.action == control_actions::request_login)

@@ -57,7 +57,7 @@ typedef struct
 typedef struct
 {
     char filename[MAXIMUM_FILE_NAME];
-} file_info;
+} control_file_info;
 
 typedef struct
 {
@@ -65,7 +65,7 @@ typedef struct
     union {
         control_login_data login_response_data;
         control_login_request_data login_request_data;
-        file_info file;
+        control_file_info file;
     };
 
 } control_datagram;
