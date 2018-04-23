@@ -189,6 +189,13 @@ void ClientUI::cmd_selector(std::string command)
 
 }
 
+void ClientUI::success(std::string message)
+{
+  std::cout << "\n";
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" SUCCESS_COLOR "SUCCESS" STANDARD_COLOR "]: ";
+  std::cout << message;
+}
+
 void ClientUI::success(int succ_code, std::string message1, std::string message2, std::string message3)
 {
   std::cout << "\n";
@@ -253,6 +260,13 @@ void ClientUI::warning(int warn_code, std::string message1, std::string message2
     warning("BAD CALL;");
     break;
   }
+}
+
+void ClientUI::error(std::string message)
+{
+  std::cout << "\n";
+  std::cout << "[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" ERROR_COLOR "ERROR" STANDARD_COLOR "]: " ;
+  std::cout << message;
 }
 
 void ClientUI::error(int err_code, std::string message1, std::string message2, std::string message3)

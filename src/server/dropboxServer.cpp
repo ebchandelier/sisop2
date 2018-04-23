@@ -55,6 +55,14 @@ int main(int argc, char **argv)
 				printf("Sending package:\n%s\n", stringifier.stringify(login_response).c_str());
 				connector.send_package(login_response, addr);
 			}
+			if (package.control.action == control_actions::request_logout)
+			{
+				datagram logout_response;
+				logout_response.type = datagram_type::control;
+				logout_response.control.action = control_actions::accept_logout;
+				printf("Sending package:\n%s\n", stringifier.stringify(logout_response).c_str());
+				connector.send_package(logout_response, addr);
+			}
 		}
 	}
 }

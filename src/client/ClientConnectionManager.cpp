@@ -1,6 +1,6 @@
 #include "./ClientConnectionManager.h"
 
-int	ClientConnectionManager::login_server(char* host, int port)
+int	ClientConnectionManager::login_server(char* username, char* host, int port)
 {
     printf("\nConnection to server...\n");
     connector.connect(host, port);
@@ -9,6 +9,8 @@ int	ClientConnectionManager::login_server(char* host, int port)
     datagram login_request;
     login_request.type = datagram_type::control;
     login_request.control.action = control_actions::request_login;
+    strncpy(login_request.control.login_request_data.username, username, MAXIMUM_USERNAME);
+    
 
     connector.send_package(login_request);
     datagram response = connector.receive_package();

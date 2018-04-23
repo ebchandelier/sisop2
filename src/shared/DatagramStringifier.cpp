@@ -70,7 +70,16 @@ std::string DatagramStringifier::stringify(datagram package)
                 out += "corrupted (" + std::to_string((int)action) + ")";
         }
         out += "\"\n";
+
+        if (package.control.action == control_actions::request_login)
+        {
+            out += "username: \"";
+            out.append(package.control.login_request_data.username);
+            out += "\"\n";
+        }
     }
+
+
 
     return out;
 }

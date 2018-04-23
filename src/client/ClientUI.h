@@ -77,6 +77,7 @@ public:
     void cmd_selector(std::string command);
 
     //Mensagem de sucesso em geral
+    void success(std::string message);
     void success(int succ_code, std::string message1, std::string message2, std::string message3);
 
     //Mensagens de aviso em geral
@@ -84,6 +85,7 @@ public:
     void warning(int warn_code, std::string message1, std::string message2, std::string message3);
 
     //Mensagem de erros em geral
+    void error(std::string message);
     void error(int err_code, std::string message1, std::string message2, std::string message3);
 
 private:

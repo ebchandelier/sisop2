@@ -18,7 +18,7 @@ std::string emptymsg;
 int command;
 
 //Estabelece uma sessão entre o cliente com o servidor.
-int login_server(char* host, int port);
+int login_server(char* username, char* host, int port);
 
 //Sincroniza o diretório “sync_dir_<nomeusuário>” com o servidor.
 void sync_client();

@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #define DATA_BUFFER_SIZE 1400
+#define MAXIMUM_USERNAME 10
 #define MAXIMUM_FILE_NAME 100
 
 enum class datagram_type
@@ -50,6 +51,11 @@ typedef struct
 
 typedef struct
 {
+    char username[MAXIMUM_USERNAME];
+} control_login_request_data;
+
+typedef struct
+{
     char filename[MAXIMUM_FILE_NAME];
 } file_info;
 
@@ -58,6 +64,7 @@ typedef struct
     control_actions action;
     union {
         control_login_data login_response_data;
+        control_login_request_data login_request_data;
         file_info file;
     };
 

@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     ui.success(SUCC_ARGS, username, endereco, porta);
   }
 
-  login_server(endereco, atoi(porta));
+  login_server((char *)username.c_str(), endereco, atoi(porta));
 
   command = ui.cmdline(UI_START);
   command_solver(command);
@@ -25,9 +25,9 @@ int main(int argc, char **argv)
   return 0;
 }
 
-int login_server(char* host, int port)
+int login_server(char* username, char* host, int port)
 {
-  int result = manager.login_server(host, port);
+  int result = manager.login_server(username, host, port);
   if (result == 0)
   {
     ui.success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
