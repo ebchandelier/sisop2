@@ -5,7 +5,7 @@
 #include "ClientHandler.h"
 #include "ThreadSafeQueue.h"
 
-#define MAXIMUM_PACKAGES_QUEUE_SIZE 50
+#define MAXIMUM_PACKAGES_QUEUE_SIZE 100
 
 int main(int argc, char **argv)
 {
@@ -41,7 +41,10 @@ int main(int argc, char **argv)
 
 
 
-	std::map<uint32_t, std::pair<ClientHandler, ThreadSafeQueue<datagram>>> handlers;
+	std::map<uint32_t, ClientHandler> handlers;
+	std::map<uint32_t, ThreadSafeQueue<datagram>*> incoming_queues;
+	std::map<uint64_t, sockaddr_in> senders;
+	ThreadSafeQueue<std::pair<sockaddr_in, datagram>> outgoing_packages(100);
 
 	printf("Initializing UDP stack...\n");
     ServerConnectorUDP connector = ServerConnectorUDP();
@@ -58,43 +61,20 @@ int main(int argc, char **argv)
 		// If this is a package from a new client
 		if (handlers.count(client_id) == 0)
 		{
-			// Create a handler for it
-			handlers.emplace(client_id, std::make_pair(ClientHandler(), ThreadSafeQueue<datagram>(MAXIMUM_PACKAGES_QUEUE_SIZE)));
-			
-			// And start it in a new thread
+			// Create a queue for future incoming messages
+			incoming_queues.emplace(client_id, new ThreadSafeQueue<datagram>(MAXIMUM_PACKAGES_QUEUE_SIZE));
+			// Create a ClientHandler
+			handlers.emplace(client_id, ClientHandler(incoming_queues.at(client_id), new OutgoingPackages(addr, &outgoing_packages)));
+			// And run the handler in a new thread
 			std::thread([&handlers, client_id]() {
-				auto& queue = handlers.at(client_id).second;
-				auto& handler = handlers.at(client_id).first;
-				handler.run(queue);
+				handlers.at(client_id).run();
 			}).detach();
-			
 		}
-		// Otherwise, dispatch the package to the correct queue
-		else
-		{
-			auto& queue = handlers.at(client_id).second;
-			queue.produce(package);
-		}
+		// Dispatch the package to the correct queue
+		incoming_queues.at(client_id)->produce(package);
 
-		// TODO: Move this to ClientHandler.run()
-		if (package.type == datagram_type::control)
-		{
-			if (package.control.action == control_actions::request_login)
-			{
-				datagram login_response;
-				login_response.type = datagram_type::control;
-				login_response.control.action = control_actions::accept_login;
-				printf("Sending package:\n%s\n", stringifier.stringify(login_response).c_str());
-				connector.send_package(login_response, addr);
-			}
-			if (package.control.action == control_actions::request_logout)
-			{
-				datagram logout_response;
-				logout_response.type = datagram_type::control;
-				logout_response.control.action = control_actions::accept_logout;
-				printf("Sending package:\n%s\n", stringifier.stringify(logout_response).c_str());
-				connector.send_package(logout_response, addr);
-			}
-		}
+
+		auto outgoing_package = outgoing_packages.consume();
+		connector.send_package(outgoing_package.second, outgoing_package.first);
 	}
 }
