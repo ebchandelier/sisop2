@@ -72,6 +72,8 @@ typedef struct
 
 typedef struct
 {
+    // Is this the last package of the file
+    bool is_last;    
     // How many bytes are actual data on the buffer
     uint32_t data_length;
     // Buffer holding the data

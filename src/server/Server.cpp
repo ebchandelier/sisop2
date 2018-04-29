@@ -42,7 +42,8 @@ void Server::run()
 		// Dispatch the package to the correct queue
 		incoming_queues.at(client_id)->produce(package);
 
-		auto outgoing_package = outgoing_packages.consume();
-		connector.send_package(outgoing_package.second, outgoing_package.first);
+		auto outgoing_package_info = outgoing_packages.consume();
+		printf("Sending package to %d:\n%s\n", outgoing_package_info.first.sin_addr.s_addr, stringifier.stringify(outgoing_package_info.second).c_str());		
+		connector.send_package(outgoing_package_info.second, outgoing_package_info.first);
 	}
 }

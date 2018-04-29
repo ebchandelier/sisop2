@@ -18,18 +18,32 @@ void ClientHandler::run()
 				datagram login_response;
 				login_response.type = datagram_type::control;
 				login_response.control.action = control_actions::accept_login;
-				printf("Sending package:\n%s\n", stringifier.stringify(login_response).c_str());
                 outgoing_packages->produce(login_response);
-				//connector.send_package(login_response, addr);
 			}
 			if (package.control.action == control_actions::request_logout)
 			{
 				datagram logout_response;
 				logout_response.type = datagram_type::control;
 				logout_response.control.action = control_actions::accept_logout;
-				printf("Sending package:\n%s\n", stringifier.stringify(logout_response).c_str());
                 outgoing_packages->produce(logout_response);
-				//connector.send_package(logout_response, addr);
+			}
+			if (package.control.action == control_actions::request_upload)
+			{
+				datagram response;
+				response.type = datagram_type::control;
+				response.control.action = control_actions::accept_upload;
+				outgoing_packages->produce(response);
+				buffer.clear();
+				state = ClientHandlerState::receiving_file;
+			}
+		}
+		else if (package.type == datagram_type::data)
+		{
+			buffer.push_back(package);
+			if (package.data.is_last)
+			{
+				PersistenceFileManager().write("FILENAME", buffer);
+				buffer.clear();
 			}
 		}
     }

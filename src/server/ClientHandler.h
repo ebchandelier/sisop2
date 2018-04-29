@@ -3,8 +3,14 @@
 #include "ThreadSafeQueue.h"
 #include "../shared/datagram.h"
 #include "../shared/DatagramStringifier.h"
+#include "../shared/PersistenceFileManager.cpp"
 #include "OutgoingPackages.h"
 #include "fileInfo.h"
+
+enum class ClientHandlerState
+{
+    receiving_file
+};
 
 class ClientHandler
 {
@@ -20,4 +26,8 @@ private:
     OutgoingPackages *outgoing_packages;
 
     DatagramStringifier stringifier;
+
+    ClientHandlerState state;
+
+    std::vector<datagram> buffer;
 };

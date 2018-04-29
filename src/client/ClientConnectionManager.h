@@ -2,6 +2,7 @@
 #include <cstring>
 #include "ClientConnectorUDP.h"
 #include "../shared/datagram.h"
+#include "../shared/PersistenceFileManager.cpp"
 #include "../shared/DatagramStringifier.h"
 
 class ClientConnectionManager

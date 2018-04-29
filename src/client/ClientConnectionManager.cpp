@@ -38,7 +38,13 @@ void ClientConnectionManager::sync_client()
 }
 void ClientConnectionManager::send_file(char* file)
 {
-
+    auto packages = PersistenceFileManager().read(file);
+    for (auto package : packages)
+    {
+        connector.send_package(package);
+        auto response = connector.receive_package();
+        // TODO: Send ack
+    }
 }
 void ClientConnectionManager::get_file(char* file)
 {

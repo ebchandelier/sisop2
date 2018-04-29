@@ -42,6 +42,8 @@ public:
 
         }
 
+        datagramVector.back().data.is_last = true;
+
         return datagramVector;
     }
     
@@ -99,6 +101,7 @@ private:
         datagram dataGram;
         dataGram.type = datagram_type::data;
         dataGram.data = data;
+        dataGram.data.is_last = false;
 
         return dataGram;
     }
