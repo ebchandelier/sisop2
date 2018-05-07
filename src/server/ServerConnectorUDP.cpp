@@ -22,6 +22,13 @@ void ServerConnectorUDP::init(int port)
 	{
 		printf("ERROR on binding");
 	}
+
+	// Set socket to be non-blocking
+	auto fcntl_result = fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if (fcntl_result == -1)
+	{
+		printf("ERROR on fcntl");
+	}
 	
 	clilen = sizeof(struct sockaddr_in);
 }
@@ -35,15 +42,34 @@ void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr)
 	}
 }
 
-std::pair<datagram, sockaddr_in> ServerConnectorUDP::receive_next_package_and_addr()
+bool ServerConnectorUDP::has_new_package()
 {
-	datagram package;
 	int n = recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &cli_addr, &clilen);
 	if (n < 0)
 	{
-		printf("ERROR on recvfrom");
+		new_package = false;
+		//printf("ERROR on recvfrom");
 	}
-	return std::make_pair(package, cli_addr);
+	else
+	{
+		// TODO: Check read length
+		// if (n == DATAGRAM_SIZE) { ... }
+		new_package = true;
+	}
+	return new_package;
+}
+
+std::pair<datagram, sockaddr_in> ServerConnectorUDP::receive_next_package_and_addr()
+{
+	if (new_package)
+	{
+		new_package = false;
+		return std::make_pair(package, cli_addr);
+	}
+	else
+	{
+		throw("No package available");
+	}
 }
 
 void ServerConnectorUDP::close()

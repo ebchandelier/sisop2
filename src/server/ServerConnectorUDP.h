@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <utility>
+#include <fcntl.h>
 
 #include "../shared/datagram.h"
 
@@ -19,6 +20,8 @@ public:
 
 	// Initializes a UDP connection on this port
 	void init(int port);
+
+	bool has_new_package();
 
 	// Blocking get the next package and return it with the sender information
 	std::pair<datagram, sockaddr_in> receive_next_package_and_addr();
@@ -33,4 +36,7 @@ private:
 	int sockfd, n;
 	socklen_t clilen;
 	struct sockaddr_in serv_addr, cli_addr;
+
+	bool new_package = false;
+	datagram package;
 };

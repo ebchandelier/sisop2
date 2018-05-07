@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -6,7 +8,6 @@
 #include <string.h>
 #include <netdb.h>
 #include <stdio.h>
-#pragma once
 #include "../shared/datagram.h"
 #include <string>
 
