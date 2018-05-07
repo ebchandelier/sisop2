@@ -42,7 +42,7 @@ void ClientConnectionManager::send_file(char* file)
     for (auto package : packages)
     {
         connector.send_package(package);
-        auto response = connector.receive_package();
+        //auto response = connector.receive_package();
         // TODO: Send ack
     }
 }

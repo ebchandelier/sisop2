@@ -56,18 +56,22 @@ int login_server(char* username, char* host, int port)
 
 void sync_client()
 {
+  manager.sync_client();
 }
 
 void send_file(char* file)
 {
+  manager.send_file(file);
 }
 
 void get_file(char* file)
 {
+  manager.get_file(file);
 }
 
 void delete_file(char* file)
 {
+  manager.delete_file(file);
 }
 
 void close_session()
