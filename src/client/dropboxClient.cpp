@@ -1,5 +1,5 @@
 #include "dropboxClient.h"
-#include "CheckFileChangesDaemonThread.cpp"
+#include "CheckFileChangesDaemonThread.h"
 
 CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread();
 ClientConnectionManager manager;
