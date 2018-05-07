@@ -1,7 +1,7 @@
 #include "dropboxClient.h"
 #include "CheckFileChangesDaemonThread.h"
 
-CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread();
+
 ClientConnectionManager manager;
 ClientUI ui;
 std::string username;
@@ -44,7 +44,11 @@ int login_server(char* username, char* host, int port)
   if (result == 0)
   {
     ui.success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
-    checkFileChangesDaemonThread.create(std::string(username));
+    // Start Daemon
+    CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread(manager);
+    std::thread([&checkFileChangesDaemonThread, &username](){
+      checkFileChangesDaemonThread.run(std::string(username));
+    }).detach();
     return LOGIN_TRUE;
   } 
   else 
@@ -85,7 +89,7 @@ void close_session()
   {
     ui.warning("Server did not acknowledged the logout");
   }
-  checkFileChangesDaemonThread.kill();
+  //checkFileChangesDaemonThread.kill();
 }
 
 void command_solver(int command)

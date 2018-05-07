@@ -78,7 +78,12 @@ std::string DatagramStringifier::stringify(datagram package)
             out += "\"\n";
         }
     }
-
+    if (package.type == datagram_type::data)
+    {
+        out += "Content: \"" + std::string(package.data.buffer) + "\"\n";
+        out += "Id: " + std::to_string(package.data.package_id) + "\n";
+        out += "Is Last:" + std::to_string(package.data.is_last) + "\n";
+    }
 
 
     return out;

@@ -1,16 +1,11 @@
 #include "CheckFileChangesDaemonThread.h"
 
-void CheckFileChangesDaemonThread::create(std::string userName) 
+void CheckFileChangesDaemonThread::run(std::string userName)
 {
-    this->thread = std::thread(checkFileChange, userName);
+    checkFileChange(userName, clientConnectionManager);
 }
 
-void CheckFileChangesDaemonThread::kill() 
-{
-    this->thread.~thread();
-}
-
-void CheckFileChangesDaemonThread::checkFileChange(std::string userName) 
+void CheckFileChangesDaemonThread::checkFileChange(std::string userName, ClientConnectionManager& clientConnectionManager) 
 {
     char buffer[BUF_LEN];
     int fd = inotify_init();
@@ -38,7 +33,10 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string userName)
                     } 
                     else 
                     {
-                        std::cout << "The file " << event->name << " was Created\n";      
+                        std::cout << "The file " << event->name << " was Created\n";
+                        std::string path(event->name);
+                        path = "./" + path;
+                        clientConnectionManager.send_file((char *)path.c_str());   
                     }
                 }
                 if ( event->mask & IN_MODIFY) 

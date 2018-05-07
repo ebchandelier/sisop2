@@ -14,7 +14,7 @@ void ClientConnectorUDP::connect(std::string server_name, int port)
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sockfd == -1)
 	{
-		printf("ERROR opening socket");
+		printf("ERROR opening socket\n");
 		return;
 	}
 
@@ -30,7 +30,7 @@ void ClientConnectorUDP::send_package(datagram package)
 	int n = sendto(sockfd, &package, DATAGRAM_SIZE, 0, (const struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in));
 	if (n < 0)
 	{
-		printf("ERROR sendto");
+		printf("ERROR sendto\n");
 	}
 }
 
@@ -41,7 +41,7 @@ datagram ClientConnectorUDP::receive_package()
 	n = recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &from, &length);
 	if (n < 0)
 	{
-		printf("ERROR recvfrom");
+		printf("ERROR recvfrom\n");
 	}
 	return package;
 }

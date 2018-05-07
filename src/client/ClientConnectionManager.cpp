@@ -41,6 +41,7 @@ void ClientConnectionManager::send_file(char* file)
     auto packages = PersistenceFileManager().read(file);
     for (auto package : packages)
     {
+        std::cout << DatagramStringifier().stringify(package);
         connector.send_package(package);
         //auto response = connector.receive_package();
         // TODO: Send ack

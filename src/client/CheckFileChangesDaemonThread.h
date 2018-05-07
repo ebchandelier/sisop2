@@ -5,10 +5,12 @@
 #include <thread>
 #include <sys/inotify.h>
 #include <string.h>
-#include "./../shared/datagram.h"
 #include <vector>
 #include <dirent.h>
 #include <stdio.h>
+
+#include "./../shared/datagram.h"
+#include "ClientConnectionManager.h"
 
 #define MAX_EVENTS 1024 
 #define EVENT_SIZE (sizeof(struct inotify_event)) 
@@ -18,18 +20,19 @@
 
 class CheckFileChangesDaemonThread
 {
-private:
-    std::thread thread;
-
 public:
-    // TODO: This should be implicit in the contructor/destructor
-    void create(std::string userName);
+    CheckFileChangesDaemonThread(ClientConnectionManager& clientConnectionManager) : clientConnectionManager(clientConnectionManager)
+    {
+    }
 
-    void kill();
+    void run(std::string userName);
 
 private:
 
-    static void checkFileChange(std::string userName);
+    void checkFileChange(std::string userName, ClientConnectionManager& clientConnectionManager);
 
     static std::vector<std::string> add_inotify_watch_recursive(int fd, std::string folder);
+
+    ClientConnectionManager& clientConnectionManager;
+
 };
