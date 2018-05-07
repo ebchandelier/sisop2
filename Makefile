@@ -1,8 +1,8 @@
 client:
-	g++ -std=c++11 -o dropboxClient.out ./src/client/dropboxClient.cpp ./src/client/ClientConnectionManager.cpp ./src/client/ClientConnectorUDP.cpp ./src/client/ClientUI.cpp ./src/shared/*
+	g++ -std=c++11 -o dropboxClient.out -pthread ./src/client/*  ./src/shared/*
 
 server:
-	g++ -std=c++11 -o dropboxServer.out -pthread ./src/server/dropboxServer.cpp ./src/server/Server.cpp ./src/shared/* ./src/server/ServerConnectorUDP.cpp ./src/server/ClientHandler.cpp
+	g++ -std=c++11 -o dropboxServer.out -pthread ./src/server/* ./src/shared/*
 
 all:
 	make client && make server

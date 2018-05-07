@@ -1,5 +1,6 @@
 #include "ClientUI.h"
 #include "ClientConnectionManager.h"
+// #include "CheckFileChangesDaemonThread.cpp"
 #include <string>
 
 #define MAXNAME		50
@@ -7,15 +8,18 @@
 #define LOGIN_TRUE	1
 #define LOGIN_FALSE	0
 
-ClientConnectionManager manager;
-ClientUI ui;
-std::string username;
-char* endereco;
-char* porta;
 
-std::string emptymsg;
+//ClientConnectionManager manager;
 
-int command;
+// CheckFileChangesDaemonThread checkFileChangesDaemonThread;
+// ClientUI ui;
+// std::string username;
+// char* endereco;
+// char* porta;
+
+// std::string emptymsg;
+
+// int command;
 
 //Estabelece uma sessão entre o cliente com o servidor.
 int login_server(char* username, char* host, int port);
