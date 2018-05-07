@@ -2,6 +2,7 @@
 
 int	ClientConnectionManager::login_server(char* username, char* host, int port)
 {
+    std::unique_lock<std::mutex> mlock(mutex);
     printf("\nConnection to server...\n");
     connector.connect(host, port);
 
@@ -34,10 +35,11 @@ int	ClientConnectionManager::login_server(char* username, char* host, int port)
 }
 void ClientConnectionManager::sync_client()
 {
-
+    std::unique_lock<std::mutex> mlock(mutex);
 }
 void ClientConnectionManager::send_file(char* file)
 {
+    std::unique_lock<std::mutex> mlock(mutex);
     auto packages = PersistenceFileManager().read(file);
     for (auto package : packages)
     {
@@ -49,14 +51,15 @@ void ClientConnectionManager::send_file(char* file)
 }
 void ClientConnectionManager::get_file(char* file)
 {
-
+    std::unique_lock<std::mutex> mlock(mutex);
 }
 void ClientConnectionManager::delete_file(char* file)
 {
-
+    std::unique_lock<std::mutex> mlock(mutex);
 }
 int ClientConnectionManager::logout()
 {
+    std::unique_lock<std::mutex> mlock(mutex);
     printf("\nLogging out...\n");
     // Build logout request package
     datagram logout_request;

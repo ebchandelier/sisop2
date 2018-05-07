@@ -1,5 +1,6 @@
 #pragma once
 #include <cstring>
+#include <mutex>
 #include "ClientConnectorUDP.h"
 #include "../shared/datagram.h"
 #include "../shared/PersistenceFileManager.cpp"
@@ -17,6 +18,8 @@ public:
     int logout();
 
 private:
-
     ClientConnectorUDP connector;
+    
+    // This class behaves like a monitor, only allowing one method to be executing at a time
+    std::mutex mutex;
 };
