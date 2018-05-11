@@ -7,7 +7,6 @@ ClientUI ui;
 std::string username;
 char* endereco;
 char* porta;
-
 std::string emptymsg;
 
 int command;
@@ -32,8 +31,11 @@ int main(int argc, char **argv)
 
   login_server((char *)username.c_str(), endereco, atoi(porta));
 
-  command = ui.cmdline(UI_START);
-  command_solver(command);
+  while(true)
+  {
+    command = ui.cmdline(UI_START);
+    command_solver(command);
+  }
 
   return 0;
 }
@@ -99,11 +101,11 @@ void command_solver(int command)
   {
 
   case CODE_UPLOAD:
-    //send_file();
+    send_file(&(ui.get_parameter())[0]);
     break;
 
   case CODE_DOWNLOAD:
-    //get_file();
+    get_file(&(ui.get_parameter())[0]);
     break;
 
   case CODE_LISTSERV:
@@ -115,7 +117,7 @@ void command_solver(int command)
     break;
 
   case CODE_SYNCDIR:
-    //sync_client();
+    sync_client();
     break;
 
   case CODE_EXIT:
@@ -123,7 +125,6 @@ void command_solver(int command)
     break;
 
   default:
-    ui.cmdline_input();
     break;
 
   }

@@ -11,6 +11,7 @@ void ClientUI::welcome_client(char* client_name)
   std::cout << "|               Bem vindo!               |\n";
   std::cout << "|                                        |\n";
   std::cout << "/________________________________________\\ \n";
+  input_parameter = "";
   skip_new_line = false;
 }
 
@@ -145,8 +146,10 @@ void ClientUI::cmd_selector(std::string command)
     if (command.size() <= 8)
     {
       cmdline(UI_MISSING_PAR);
+      return;
     }
-    cmdline(UI_CMD_UPLOAD);      
+    input_parameter = command.substr(7);
+    cmdline(UI_CMD_UPLOAD);
     return;
   }
 
@@ -155,8 +158,10 @@ void ClientUI::cmd_selector(std::string command)
     if (command.size() <= 10)
     {
       cmdline(UI_MISSING_PAR);
-    } 
-    cmdline(UI_CMD_DOWNLOAD);      
+      return;
+    }
+    input_parameter = command.substr(9);
+    cmdline(UI_CMD_DOWNLOAD);
     return;
   }
 
@@ -168,13 +173,13 @@ void ClientUI::cmd_selector(std::string command)
 
   if (!command.compare(CMD_LISTCLI))
   {
-    cmdline(UI_CMD_LISTCLI);      
+    cmdline(UI_CMD_LISTCLI);
     return;
   }
 
   if (!command.compare(CMD_SYNCDIR))
   {
-    cmdline(UI_CMD_SYNCDIR);      
+    cmdline(UI_CMD_SYNCDIR);
     return;
   }
 
@@ -299,3 +304,9 @@ void ClientUI::error(int err_code, std::string message1, std::string message2, s
 
   return;
 }
+
+std::string ClientUI::get_parameter()
+{
+  return input_parameter;
+}
+

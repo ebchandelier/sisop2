@@ -88,6 +88,9 @@ public:
     void error(std::string message);
     void error(int err_code, std::string message1, std::string message2, std::string message3);
 
+    //Acesso parametro do comando
+    std::string get_parameter();
+
 private:
 
     std::string new_command;
