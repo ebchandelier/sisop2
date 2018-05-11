@@ -25,11 +25,11 @@ public:
     {
     }
 
-    void run(std::string userName);
+    void run(std::string path);
 
 private:
 
-    void checkFileChange(std::string userName, ClientConnectionManager& clientConnectionManager);
+    void checkFileChange(std::string path, ClientConnectionManager& clientConnectionManager);
 
     static std::vector<std::string> add_inotify_watch_recursive(int fd, std::string folder);
 

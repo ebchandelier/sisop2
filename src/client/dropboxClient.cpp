@@ -46,10 +46,16 @@ int login_server(char* username, char* host, int port)
   if (result == 0)
   {
     ui.success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
+
+    // Create folder if needed
+    std::string path = "/home/" + std::string(username) + "/sisop_dropbox";
+    std::string command = "mkdir -p " + path;
+    system(command.c_str());
+
     // Start Daemon
     CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread(manager);
-    std::thread([&checkFileChangesDaemonThread, &username](){
-      checkFileChangesDaemonThread.run(std::string(username));
+    std::thread([&checkFileChangesDaemonThread, path](){
+      checkFileChangesDaemonThread.run(path);
     }).detach();
     return LOGIN_TRUE;
   } 
@@ -101,11 +107,11 @@ void command_solver(int command)
   {
 
   case CODE_UPLOAD:
-    send_file(&(ui.get_parameter())[0]);
+    send_file((char *)ui.get_parameter().c_str());
     break;
 
   case CODE_DOWNLOAD:
-    get_file(&(ui.get_parameter())[0]);
+    get_file((char *)ui.get_parameter().c_str());
     break;
 
   case CODE_LISTSERV:

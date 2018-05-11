@@ -1,17 +1,17 @@
 #include "CheckFileChangesDaemonThread.h"
 
-void CheckFileChangesDaemonThread::run(std::string userName)
+void CheckFileChangesDaemonThread::run(std::string path)
 {
-    checkFileChange(userName, clientConnectionManager);
+    checkFileChange(path, clientConnectionManager);
 }
 
-void CheckFileChangesDaemonThread::checkFileChange(std::string userName, ClientConnectionManager& clientConnectionManager) 
+void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConnectionManager& clientConnectionManager) 
 {
     char buffer[BUF_LEN];
     int fd = inotify_init();
-    std::string userPath = "/home/sync_dir_" + userName;
+    //std::string userPath = "/home/" + userName + "sisop_dropbox";
 
-    std::vector<std::string> wdVector = add_inotify_watch_recursive(fd, userPath);
+    std::vector<std::string> wdVector = add_inotify_watch_recursive(fd, path);
  
     while(true) 
     {
@@ -27,7 +27,7 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string userName, ClientC
                     if (event->mask & IN_ISDIR) 
                     {
                         std::cout << "The directory " << event->name << " was Created\n";
-                        std::string newPath = userPath + "/" + std::string(event->name);
+                        std::string newPath = path + "/" + std::string(event->name);
                         int anotherWd = inotify_add_watch(fd, newPath.c_str(), FILTERS);
                         wdVector.push_back(newPath);
                     } 
