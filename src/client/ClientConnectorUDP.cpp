@@ -27,10 +27,15 @@ void ClientConnectorUDP::connect(std::string server_name, int port)
 
 void ClientConnectorUDP::send_package(datagram package)
 {
-	int n = sendto(sockfd, &package, DATAGRAM_SIZE, 0, (const struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in));
-	if (n < 0)
-	{
-		printf("ERROR sendto\n");
+	while(true) {
+		int n = sendto(sockfd, &package, DATAGRAM_SIZE, 0, (const struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in));
+		if (n < 0)
+		{
+			//printf("ERROR sendto\n");
+		}
+		else {
+			return;
+		}
 	}
 }
 

@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   }
 
   login_server((char *)username.c_str(), endereco, atoi(porta));
-
+  
   command = ui.cmdline(UI_START);
   command_solver(command);
 

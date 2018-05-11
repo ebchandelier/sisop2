@@ -18,6 +18,7 @@ void ClientHandler::run()
 				datagram login_response;
 				login_response.type = datagram_type::control;
 				login_response.control.action = control_actions::accept_login;
+				this->username = login_response.control.login_request_data.username;
                 outgoing_packages->produce(login_response);
 			}
 			if (package.control.action == control_actions::request_logout)

@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <string>
 #include "ThreadSafeQueue.h"
 #include "../shared/datagram.h"
 #include "../shared/DatagramStringifier.h"
@@ -30,4 +31,6 @@ private:
     ClientHandlerState state;
 
     std::vector<datagram> buffer;
+
+    std::string username;
 };
