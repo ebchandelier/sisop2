@@ -36,6 +36,42 @@ int	ClientConnectionManager::login_server(char* username, char* host, int port)
 void ClientConnectionManager::sync_client()
 {
     std::unique_lock<std::mutex> mlock(mutex);
+
+    // Send sync request
+    datagram sync_request;
+    sync_request.type = datagram_type::control;
+    sync_request.control.action = control_actions::request_sync_dir;
+    connector.send_package(sync_request);
+
+    auto response = connector.receive_package();
+    if (response.type == datagram_type::control &&
+        response.control.action == control_actions::accept_sync_dir)
+    {
+        auto files_count = response.control.sync_dir_response.files_count;
+        for (int i = 0; i < files_count; i++)
+        {
+            // Get upload request
+            auto upload_request = connector.receive_package();
+            std::string file_name = upload_request.control.file.filename;
+            // Accept upload request
+            datagram accept_upload;
+            accept_upload.type = datagram_type::control;
+            accept_upload.control.action = control_actions::accept_upload;
+            connector.send_package(accept_upload);
+            // Get file
+            while (true)
+            {
+                std::vector<datagram> packages;
+                auto package = connector.receive_package();
+                packages.push_back(package);
+                if (package.data.is_last)
+                {
+                    PersistenceFileManager().write("./" + file_name, packages);
+                    break;
+                }
+            }
+        }
+    }
 }
 void ClientConnectionManager::send_file(char* file)
 {

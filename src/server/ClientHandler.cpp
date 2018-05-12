@@ -68,6 +68,34 @@ void ClientHandler::run()
 				FileInfoVectorSerializer().serialize(response.control.list_files_response.data, files);
 				outgoing_packages->produce(response);
 			}
+			if (package.control.action == control_actions::request_sync_dir)
+			{
+				// Confirm Sync
+				auto files = ListFiles::listFilesAt(this->user_path);
+				datagram response;
+				response.type = datagram_type::control;
+				response.control.action = control_actions::accept_sync_dir;
+				response.control.sync_dir_response.files_count = files.size();
+				outgoing_packages->produce(response);
+				for (auto file : files)
+				{
+					// Request upload for file
+					datagram upload_request;
+					upload_request.type = datagram_type::control;
+					upload_request.control.action = control_actions::request_upload;
+					strcpy(upload_request.control.file.filename, file.name.c_str());
+					outgoing_packages->produce(upload_request);
+
+					auto upload_request_response = incoming_packages->consume();
+					// TODO: Check response
+
+					auto packages = PersistenceFileManager().read(this->user_path + "/" + working_file_name + "/" + file.name);
+					for (auto package : packages)
+					{
+						outgoing_packages->produce(package);
+					}
+				}
+			}
 		}
 		else if (package.type == datagram_type::data)
 		{

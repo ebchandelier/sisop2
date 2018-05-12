@@ -72,6 +72,12 @@ std::string DatagramStringifier::stringify(datagram package)
             case control_actions::accept_list_files:
                 out += "accept_list_files";
                 break;
+            case control_actions::request_sync_dir:
+                out += "request_sync_dir";
+                break;
+            case control_actions::accept_sync_dir:
+                out += "accept_sync_dir";
+                break;
             default:
                 out += "corrupted (" + std::to_string((int)action) + ")";
         }
@@ -97,6 +103,12 @@ std::string DatagramStringifier::stringify(datagram package)
         {
             out += "file: \"";
             out.append(package.control.file.filename);
+            out += "\"\n";
+        }
+        if (package.control.action == control_actions::accept_sync_dir)
+        {
+            out += "files_count: \"";
+            out += std::to_string(package.control.sync_dir_response.files_count);
             out += "\"\n";
         }
     }

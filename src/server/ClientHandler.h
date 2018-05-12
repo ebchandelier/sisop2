@@ -22,6 +22,7 @@ public:
     void run();
 
 private:
+
     std::list<file_info> files;
 
     ThreadSafeQueue<datagram> *incoming_packages;

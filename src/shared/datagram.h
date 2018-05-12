@@ -38,6 +38,9 @@ enum class control_actions
     request_list_files,
     accept_list_files,
 
+    request_sync_dir,
+    accept_sync_dir,
+
     ack
 };
 
@@ -69,12 +72,18 @@ typedef struct
 
 typedef struct
 {
+    int files_count;
+} control_sync_dir_response_data;
+
+typedef struct
+{
     control_actions action;
     union {
         control_login_data login_response_data;
         control_login_request_data login_request_data;
         control_file_info file;
         control_list_files_response_data list_files_response;
+        control_sync_dir_response_data sync_dir_response;
     };
 
 } control_datagram;

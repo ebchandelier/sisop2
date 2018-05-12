@@ -62,6 +62,9 @@ int login_server(char* username, char* host, int port)
     system(command.c_str());
     manager.work_dir = path;
 
+    // Do initial sync
+    manager.sync_client();
+
     // Start Daemon
     CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread(manager);
     std::thread([&checkFileChangesDaemonThread, path](){
