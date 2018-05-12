@@ -41,6 +41,17 @@ void ClientConnectionManager::send_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
     auto packages = PersistenceFileManager().read(file);
+
+    // Send upload request
+    datagram request;
+    request.type = datagram_type::control;
+    request.control.action = control_actions::request_upload;
+    strcpy(request.control.file.filename, file);
+    connector.send_package(request);
+
+    auto response = connector.receive_package();
+    // TODO: Check response
+
     for (auto package : packages)
     {
         std::cout << DatagramStringifier().stringify(package);

@@ -24,8 +24,8 @@ void ClientHandler::run()
 
 				// Create folder for this user
 				this->username = std::string(package.control.login_request_data.username);
-				std::string command = std::string("mkdir -p ") + this->base_path + "/" + this->username;
-				//std::cout << "command: " << command;
+				this->user_path = this->base_path + "/" + this->username;
+				std::string command = std::string("mkdir -p ") + this->user_path;
     			system(command.c_str());
 
 				// Send confirmation
@@ -43,6 +43,8 @@ void ClientHandler::run()
 				datagram response;
 				response.type = datagram_type::control;
 				response.control.action = control_actions::accept_upload;
+
+				working_file_name = package.control.file.filename;
 				outgoing_packages->produce(response);
 				buffer.clear();
 				state = ClientHandlerState::receiving_file;
@@ -53,8 +55,15 @@ void ClientHandler::run()
 			buffer.push_back(package);
 			if (package.data.is_last)
 			{
-				PersistenceFileManager().write("FILENAME", buffer);
+				// Write file to disk
+				auto full_file_path = this->user_path + "/" + working_file_name;
+				PersistenceFileManager().write(full_file_path, buffer);
 				buffer.clear();
+
+				// Add file to list
+				file_info file;
+				file.name = working_file_name;
+				files.push_back(file);
 			}
 		}
     }
