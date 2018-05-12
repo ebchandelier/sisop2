@@ -127,7 +127,7 @@ int ClientUI::cmdline(int ui_code)
 void ClientUI::cmdline_input()
 {
   std::cout << "\n[" DROPBOX_COLOR "DboxClient" STANDARD_COLOR "][" INPUT_COLOR "INPUT" STANDARD_COLOR "]: ";
-  std::cin >> new_command;
+  std::getline(std::cin, new_command);
   skip_new_line = true;
   cmd_selector(new_command);
 }
