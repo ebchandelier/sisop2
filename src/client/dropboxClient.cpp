@@ -129,13 +129,13 @@ void command_solver(int command)
     break;
 
   case CODE_LISTSERV:
-    manager.sendListFilesRequest(username);
-    //close_session();
+    files = manager.sendListFilesRequest();
+    ListFiles::print(files);
     break;
 
   case CODE_LISTCLI:
     files = ListFiles::listFilesAt(absolutePath);
-    ListFiles::print(absolutePath, files);
+    ListFiles::print(files);
     break;
 
   case CODE_SYNCDIR:

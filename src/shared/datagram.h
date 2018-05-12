@@ -61,11 +61,6 @@ typedef struct
     char filename[MAXIMUM_FILE_NAME];
 } control_file_info;
 
-typedef struct {
-
-    char username[MAXIMUM_USERNAME];
-} control_list_file_of_user;
-
 typedef struct
 {
     control_actions action;
@@ -73,7 +68,6 @@ typedef struct
         control_login_data login_response_data;
         control_login_request_data login_request_data;
         control_file_info file;
-        control_list_file_of_user user;
     };
 
 } control_datagram;
@@ -100,6 +94,3 @@ typedef struct
 
 
 #define DATAGRAM_SIZE sizeof(datagram)
-
-
-

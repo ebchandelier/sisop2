@@ -5,6 +5,7 @@
 #include "../shared/datagram.h"
 #include "../shared/PersistenceFileManager.cpp"
 #include "../shared/DatagramStringifier.h"
+#include "../shared/fileInfo.h"
 
 class ClientConnectionManager
 {
@@ -16,7 +17,7 @@ public:
     void get_file(char* file);
     void delete_file(char* file);
     int logout();
-    void sendListFilesRequest(std::string userName);
+    std::vector<file_info> sendListFilesRequest();
 
     std::string work_dir;
 

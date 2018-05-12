@@ -39,9 +39,9 @@ public:
         return files;
     }
 
-    static void print(std::string path, std::vector<file_info> files) {
+    static void print(std::vector<file_info> files) {
 
-        std::cout << "\nListingFiles at " << path << ":\n";
+        std::cout << "\nListing Files:\n";
 
         for(auto file : files) {
 

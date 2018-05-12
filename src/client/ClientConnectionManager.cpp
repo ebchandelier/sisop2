@@ -61,7 +61,7 @@ void ClientConnectionManager::send_file(char* file)
     }
 }
 
-void ClientConnectionManager::sendListFilesRequest(std::string userName)
+std::vector<file_info> ClientConnectionManager::sendListFilesRequest()
 {
     std::unique_lock<std::mutex> mlock(mutex);
 
@@ -69,12 +69,11 @@ void ClientConnectionManager::sendListFilesRequest(std::string userName)
     datagram request;
     request.type = datagram_type::control;
     request.control.action = control_actions::request_list_files;
-    strcpy(request.control.user.username, userName.c_str());
     connector.send_package(request);
 
     auto response = connector.receive_package();
     // TODO: Check response
-
+    //DESERIALIZE and return
 }
 
 void ClientConnectionManager::get_file(char* file)
