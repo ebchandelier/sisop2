@@ -49,6 +49,15 @@ void ClientHandler::run()
 				buffer.clear();
 				state = ClientHandlerState::receiving_file;
 			}
+			if (package.control.action == control_actions::request_download)
+			{
+				working_file_name = package.control.file.filename;
+				auto packages = PersistenceFileManager().read(this->user_path + "/" + working_file_name);
+				for (auto package : packages)
+				{
+					outgoing_packages->produce(package);
+				}
+			}
 		}
 		else if (package.type == datagram_type::data)
 		{

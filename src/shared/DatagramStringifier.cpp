@@ -77,6 +77,14 @@ std::string DatagramStringifier::stringify(datagram package)
             out.append(package.control.login_request_data.username);
             out += "\"\n";
         }
+        if (package.control.action == control_actions::request_download ||
+            package.control.action == control_actions::request_upload ||
+            package.control.action == control_actions::request_exclude)
+        {
+            out += "file: \"";
+            out.append(package.control.file.filename);
+            out += "\"\n";
+        }
     }
     if (package.type == datagram_type::data)
     {

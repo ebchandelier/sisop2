@@ -63,6 +63,32 @@ void ClientConnectionManager::send_file(char* file)
 void ClientConnectionManager::get_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
+
+    // Send download request
+    datagram request;
+    request.type = datagram_type::control;
+    request.control.action = control_actions::request_download;
+    strcpy(request.control.file.filename, file);
+    connector.send_package(request);
+
+    //auto response = connector.receive_package();
+    // TODO: Check response
+
+    std::vector<datagram> packages;
+    while(true)
+    {
+        auto package = connector.receive_package();
+        packages.push_back(package);
+        if (package.data.is_last)
+        {
+            break;
+        }
+    }
+
+    // TODO: If we write the file to the synced dir, the Daemon will pick up it
+    // and try to upload the file we just downloaded
+    PersistenceFileManager().write("./" + std::string(file), packages);
+
 }
 void ClientConnectionManager::delete_file(char* file)
 {

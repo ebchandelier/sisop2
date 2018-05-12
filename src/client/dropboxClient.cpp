@@ -60,6 +60,7 @@ int login_server(char* username, char* host, int port)
     std::string path = std::string(pasta) + "/sync_dir_" + std::string(username);
     std::string command = "mkdir -p " + path;
     system(command.c_str());
+    manager.work_dir = path;
 
     // Start Daemon
     CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread(manager);

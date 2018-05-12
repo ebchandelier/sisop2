@@ -17,9 +17,11 @@ public:
     void delete_file(char* file);
     int logout();
 
+    std::string work_dir;
+
 private:
     ClientConnectorUDP connector;
-    
+
     // This class behaves like a monitor, only allowing one method to be executing at a time
     std::mutex mutex;
 };
