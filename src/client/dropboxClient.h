@@ -50,3 +50,5 @@ void set_endereco(char* name);
 
 //Valida porta
 void set_porta(char* name);
+
+void set_pasta(char* name);

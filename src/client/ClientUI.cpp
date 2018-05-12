@@ -283,7 +283,7 @@ void ClientUI::error(int err_code, std::string message1, std::string message2, s
   {
 
   case ERR_NOFARGS:
-    std::cout << "Wrong number of arguments, please use: ./dropboxClient user endereco porta;" ;
+    std::cout << "Wrong number of arguments, please use: ./dropboxClient user endereco porta pasta;" ;
     error(ERR_TERMINATE, message1, message2, message3);
     exit(ERR_NOFARGS);
     break;

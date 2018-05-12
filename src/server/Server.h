@@ -13,14 +13,17 @@
 class Server
 {
 public:
-    Server(int port);
+    Server(int port, std::string base_path);
     void run();
 
 private:
     int port;
+    std::string work_path;
 
     void process_incoming_messages();
     void process_outgoing_messages();
+
+    void create_root_folder_if_needed();
 
     DatagramStringifier stringifier;
     ServerConnectorUDP connector;

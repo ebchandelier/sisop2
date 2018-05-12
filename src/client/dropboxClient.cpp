@@ -7,6 +7,7 @@ ClientUI ui;
 std::string username;
 char* endereco;
 char* porta;
+char* pasta;
 std::string emptymsg;
 
 int command;
@@ -17,7 +18,7 @@ int main(int argc, char **argv)
 
   ui.welcome_client(argv[1]);
 
-  if (argc!=4)
+  if (argc!=5)
   {
     ui.error(ERR_NOFARGS, emptymsg, emptymsg, emptymsg);
   }
@@ -26,6 +27,7 @@ int main(int argc, char **argv)
     set_username(argv[1]);
     set_endereco(argv[2]);
     set_porta(argv[3]);
+    set_pasta(argv[4]);
     ui.success(SUCC_ARGS, username, endereco, porta);
   }
 
@@ -48,7 +50,7 @@ int login_server(char* username, char* host, int port)
     ui.success(SUCC_LOGIN, emptymsg, emptymsg, emptymsg);
 
     // Create folder if needed
-    std::string path = "/home/" + std::string(username) + "/sisop_dropbox";
+    std::string path = std::string(pasta) + "/sync_dir_" + std::string(username);
     std::string command = "mkdir -p " + path;
     system(command.c_str());
 
@@ -134,9 +136,6 @@ void command_solver(int command)
     break;
 
   }
-
-  return;
-
 }
 
 void set_username(char* arg)
@@ -145,17 +144,19 @@ void set_username(char* arg)
   {
     username = arg;
   }
-  return;
 }
 
 void set_endereco(char* arg)
 {
   endereco = arg;
-  return;
 }
 
 void set_porta(char* arg)
 {
   porta = arg;
-  return;
+}
+
+void set_pasta(char* arg)
+{
+  pasta = arg;
 }

@@ -17,7 +17,7 @@ class ClientHandler
 {
 public:
 
-    ClientHandler(ThreadSafeQueue<datagram>* incoming_packages, OutgoingPackages* outgoing_packages);
+    ClientHandler(std::string base_path, ThreadSafeQueue<datagram>* incoming_packages, OutgoingPackages* outgoing_packages);
     void run();
 
 private:
@@ -33,4 +33,6 @@ private:
     std::vector<datagram> buffer;
 
     std::string username;
+
+    std::string base_path;
 };

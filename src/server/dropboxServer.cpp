@@ -4,11 +4,12 @@ int main(int argc, char **argv)
 {
 	printf("Initializing server...\n");
 	int port;
+	std::string dir;
 
-	if(argc < 3) 
+	if(argc < 5) 
 	{
 		printf("How to use:\n");
-		printf("dropboxServer -p <port>\n");
+		printf("dropboxServer -p <port> -d <working dir>\n");
 		exit(1);
 	}
     for(int i = 1; i < argc; i++) 
@@ -26,6 +27,11 @@ int main(int argc, char **argv)
 						exit(1);
 					}
 				break;
+
+				case 'd':
+					i++;
+					dir = argv[i];
+				break;
 						  
 				default:
 					printf("Invalid parameter %d: %s\n", i, argv[i]);
@@ -38,5 +44,5 @@ int main(int argc, char **argv)
 		}
 	}
 
-	Server(port).run();
+	Server(port, dir).run();
 }

@@ -9,8 +9,6 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConne
 {
     char buffer[BUF_LEN];
     int fd = inotify_init();
-    //std::string userPath = "/home/" + userName + "sisop_dropbox";
-
     std::vector<std::string> wdVector = add_inotify_watch_recursive(fd, path);
  
     while(true) 

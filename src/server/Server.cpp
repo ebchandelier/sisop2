@@ -1,20 +1,35 @@
 #include "Server.h"
 
-Server::Server(int port) : outgoing_packages(MAXIMUM_PACKAGES_QUEUE_SIZE)
+Server::Server(int port, std::string base_path) : outgoing_packages(MAXIMUM_PACKAGES_QUEUE_SIZE)
 {
     this->port = port;
+	this->work_path = base_path + "/sync_dir";
 }
 
 void Server::run()
 {
+	create_root_folder_if_needed();
 	connector.init(port);
 	while(true)
 	{
 		// We process, at most, one incoming message and one outgoing message at a time,
 		// so if both buffers have data, the download/upload ratio will be 50/50.
-		process_incoming_messages();
-		process_outgoing_messages();
+		try
+		{
+			process_incoming_messages();
+			process_outgoing_messages();
+		} 
+		catch (std::exception e) 
+		{
+			std::cout << "Error: " << e.what();
+		}
 	}
+}
+
+void Server::create_root_folder_if_needed()
+{
+	std::string command = "mkdir -p " + this->work_path;
+    system(command.c_str());
 }
 
 void Server::process_incoming_messages()
@@ -34,7 +49,7 @@ void Server::process_incoming_messages()
 			// Create a queue for future incoming messages
 			incoming_queues.emplace(client_id, new ThreadSafeQueue<datagram>(MAXIMUM_PACKAGES_QUEUE_SIZE));
 			// Create a ClientHandler
-			handlers.emplace(client_id, ClientHandler(incoming_queues.at(client_id), new OutgoingPackages(addr, &outgoing_packages)));
+			handlers.emplace(client_id, ClientHandler(this->work_path, incoming_queues.at(client_id), new OutgoingPackages(addr, &outgoing_packages)));
 			// And run the handler in a new thread
 			std::thread([&]() {
 				handlers.at(client_id).run();
