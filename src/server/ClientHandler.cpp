@@ -61,12 +61,12 @@ void ClientHandler::run()
 			}
 			if (package.control.action == control_actions::request_list_files)
 			{
-  				std::vector<file_info> files = ListFiles::listFilesAt(this->user_path);
-				
-				// SERIALIZATION?
-				datagram packages;//
-				
-				outgoing_packages->produce(package);
+  				auto files = ListFiles::listFilesAt(this->user_path);				
+				datagram response;
+				response.type = datagram_type::control;
+				response.control.action = control_actions::accept_list_files;
+				FileInfoVectorSerializer().serialize(response.control.list_files_response.data, files);
+				outgoing_packages->produce(response);
 			}
 		}
 		else if (package.type == datagram_type::data)
@@ -81,7 +81,7 @@ void ClientHandler::run()
 
 				// Add file to list
 				file_info file;
-				strcpy(file.name, working_file_name.c_str());
+				file.name = working_file_name;
 				files.push_back(file);
 			}
 		}

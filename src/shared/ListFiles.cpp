@@ -1,20 +1,19 @@
 #pragma once
 
-#include<iostream>
+#include <iostream>
 #include "../shared/fileInfo.h"
-#include<vector>
-
+#include <list>
 #include <dirent.h>
-#include<string.h>
+#include <string.h>
 
 
 class ListFiles
 {
 public:
 
-    static std::vector<file_info> listFilesAt(std::string path) {
+    static std::list<file_info> listFilesAt(std::string path) {
 
-        std::vector<file_info> files;
+        std::list<file_info> files;
 
         struct dirent *dp;
         
@@ -26,7 +25,7 @@ public:
 
                 file_info file;
 
-                strcpy(file.name, dp->d_name);
+                file.name = dp->d_name;
                 // get type?
 
                 files.push_back(file);
@@ -39,7 +38,7 @@ public:
         return files;
     }
 
-    static void print(std::vector<file_info> files) {
+    static void print(std::list<file_info> files) {
 
         std::cout << "\nListing Files:\n";
 

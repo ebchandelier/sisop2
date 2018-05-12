@@ -113,9 +113,8 @@ void close_session()
 
 void command_solver(int command)
 {
-
+  std::list<file_info> files;
   std::string absolutePath = std::string(realpath(pasta, NULL)) + "/sync_dir_" + std::string(username);
-  std::vector<file_info> files;
 
   switch (command)
   {

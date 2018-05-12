@@ -67,7 +67,10 @@ std::string DatagramStringifier::stringify(datagram package)
                 out += "accept_logout";
                     break;
             case control_actions::request_list_files:
-                out += "request_lit_files";
+                out += "request_list_files";
+                break;
+            case control_actions::accept_list_files:
+                out += "accept_list_files";
                 break;
             default:
                 out += "corrupted (" + std::to_string((int)action) + ")";
@@ -78,6 +81,14 @@ std::string DatagramStringifier::stringify(datagram package)
         {
             out += "username: \"";
             out.append(package.control.login_request_data.username);
+            out += "\"\n";
+        }
+        if (package.control.action == control_actions::accept_list_files)
+        {
+            char data[DATA_BUFFER_SIZE];
+            strncpy(data, package.control.list_files_response.data, DATA_BUFFER_SIZE);
+            out += "files: \"";
+            out += data;
             out += "\"\n";
         }
         if (package.control.action == control_actions::request_download ||

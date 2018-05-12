@@ -61,7 +61,7 @@ void ClientConnectionManager::send_file(char* file)
     }
 }
 
-std::vector<file_info> ClientConnectionManager::sendListFilesRequest()
+std::list<file_info> ClientConnectionManager::sendListFilesRequest()
 {
     std::unique_lock<std::mutex> mlock(mutex);
 
@@ -72,8 +72,7 @@ std::vector<file_info> ClientConnectionManager::sendListFilesRequest()
     connector.send_package(request);
 
     auto response = connector.receive_package();
-    // TODO: Check response
-    //DESERIALIZE and return
+    return FileInfoVectorSerializer().deserialize(response.control.list_files_response.data);
 }
 
 void ClientConnectionManager::get_file(char* file)

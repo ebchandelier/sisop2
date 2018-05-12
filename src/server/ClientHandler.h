@@ -7,6 +7,7 @@
 #include "../shared/PersistenceFileManager.cpp"
 #include "OutgoingPackages.h"
 #include "../shared/fileInfo.h"
+#include "../shared/FileInfoVectorSerializer.h"
 
 enum class ClientHandlerState
 {
