@@ -1,10 +1,13 @@
 #pragma once
 #include <cstring>
 #include <mutex>
+#include <list>
 #include "ClientConnectorUDP.h"
 #include "../shared/datagram.h"
 #include "../shared/PersistenceFileManager.cpp"
 #include "../shared/DatagramStringifier.h"
+#include "../shared/fileInfo.h"
+#include "../shared/FileInfoVectorSerializer.h"
 
 class ClientConnectionManager
 {
@@ -16,6 +19,7 @@ public:
     void get_file(char* file);
     void delete_file(char* file);
     int logout();
+    std::list<file_info> sendListFilesRequest();
 
     std::string work_dir;
 

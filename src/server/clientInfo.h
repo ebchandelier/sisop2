@@ -1,5 +1,5 @@
 #pragma once
-#include "fileInfo.h"
+#include "../shared/fileInfo.h"
 #define MAXNAME 10
 #define MAXFILES 100
 

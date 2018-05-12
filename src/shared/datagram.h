@@ -35,6 +35,9 @@ enum class control_actions
     request_logout,
     accept_logout,
 
+    request_list_files,
+    accept_list_files,
+
     ack
 };
 
@@ -59,6 +62,11 @@ typedef struct
     char filename[MAXIMUM_FILE_NAME];
 } control_file_info;
 
+typedef struct 
+{
+    char data[DATA_BUFFER_SIZE];
+} control_list_files_response_data;
+
 typedef struct
 {
     control_actions action;
@@ -66,6 +74,7 @@ typedef struct
         control_login_data login_response_data;
         control_login_request_data login_request_data;
         control_file_info file;
+        control_list_files_response_data list_files_response;
     };
 
 } control_datagram;
@@ -92,6 +101,3 @@ typedef struct
 
 
 #define DATAGRAM_SIZE sizeof(datagram)
-
-
-

@@ -1,4 +1,5 @@
 #include "ClientHandler.h"
+#include "../shared/ListFiles.cpp"
 
 ClientHandler::ClientHandler(std::string base_path, ThreadSafeQueue<datagram>* incoming_packages, OutgoingPackages* outgoing_packages)
 {
@@ -57,6 +58,15 @@ void ClientHandler::run()
 				{
 					outgoing_packages->produce(package);
 				}
+			}
+			if (package.control.action == control_actions::request_list_files)
+			{
+  				auto files = ListFiles::listFilesAt(this->user_path);				
+				datagram response;
+				response.type = datagram_type::control;
+				response.control.action = control_actions::accept_list_files;
+				FileInfoVectorSerializer().serialize(response.control.list_files_response.data, files);
+				outgoing_packages->produce(response);
 			}
 		}
 		else if (package.type == datagram_type::data)

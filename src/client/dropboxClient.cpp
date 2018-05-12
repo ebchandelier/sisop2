@@ -1,6 +1,6 @@
 #include "dropboxClient.h"
 #include "CheckFileChangesDaemonThread.h"
-
+#include "../shared/ListFiles.cpp"
 
 ClientConnectionManager manager;
 ClientUI ui;
@@ -113,6 +113,8 @@ void close_session()
 
 void command_solver(int command)
 {
+  std::list<file_info> files;
+  std::string absolutePath = std::string(realpath(pasta, NULL)) + "/sync_dir_" + std::string(username);
 
   switch (command)
   {
@@ -126,11 +128,13 @@ void command_solver(int command)
     break;
 
   case CODE_LISTSERV:
-    //close_session();
+    files = manager.sendListFilesRequest();
+    ListFiles::print(files);
     break;
 
   case CODE_LISTCLI:
-    //close_session();
+    files = ListFiles::listFilesAt(absolutePath);
+    ListFiles::print(files);
     break;
 
   case CODE_SYNCDIR:
