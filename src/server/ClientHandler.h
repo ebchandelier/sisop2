@@ -6,7 +6,7 @@
 #include "../shared/DatagramStringifier.h"
 #include "../shared/PersistenceFileManager.cpp"
 #include "OutgoingPackages.h"
-#include "fileInfo.h"
+#include "../shared/fileInfo.h"
 
 enum class ClientHandlerState
 {
