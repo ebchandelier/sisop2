@@ -33,6 +33,8 @@ private:
     std::vector<datagram> buffer;
 
     std::string username;
+    std::string working_file_name;
 
     std::string base_path;
+    std::string user_path;
 };
