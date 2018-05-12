@@ -12,7 +12,7 @@ std::string emptymsg;
 
 int command;
 
-bool running;
+int running;
 
 
 int main(int argc, char **argv)
@@ -35,10 +35,14 @@ int main(int argc, char **argv)
 
   login_server((char *)username.c_str(), endereco, atoi(porta));
 
-  running = true;
+  running = 1;
   while(running)
   {
-    command = ui.cmdline(UI_START);
+    if (running == 1)
+    {
+      command = ui.cmdline(UI_START);
+    } else
+      command = ui.cmdline(UI_DEFAULT);
     command_solver(command);
   }
 

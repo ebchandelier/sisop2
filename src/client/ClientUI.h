@@ -21,21 +21,22 @@
 
 #define UI_START        200
 #define UI_S_HELP       202
-#define UI_S_UPLOAD	    203
+#define UI_S_UPLOAD	203
 #define UI_S_DOWNLOAD   204
 #define UI_S_LISTSERV   205
 #define UI_S_LISTCLI    206
 #define UI_S_SYNCDIR    207
 #define UI_S_EXIT       208
 #define UI_CMD_UNKNOWN  221
-#define UI_CMD_HELP	    222
+#define UI_CMD_HELP	222
 #define UI_CMD_UPLOAD   223
 #define UI_CMD_DOWNLOAD	224
 #define UI_CMD_LISTSERV	225
 #define UI_CMD_LISTCLI  226
 #define UI_CMD_SYNCDIR  227
-#define UI_CMD_EXIT	    228
+#define UI_CMD_EXIT	228
 #define UI_MISSING_PAR  230
+#define UI_DEFAULT	299
 
 #define CMD_HELP     "help"
 #define CMD_UPLOAD   "upload"
