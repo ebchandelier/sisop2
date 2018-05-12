@@ -71,7 +71,7 @@ void ClientHandler::run()
 
 				// Add file to list
 				file_info file;
-				file.name = working_file_name;
+				strcpy(file.name, working_file_name.c_str());
 				files.push_back(file);
 			}
 		}
