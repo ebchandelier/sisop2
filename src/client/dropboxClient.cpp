@@ -114,7 +114,7 @@ void close_session()
 void command_solver(int command)
 {
 
-  std::string absolutePath;
+  std::string absolutePath = std::string(realpath(pasta, NULL)) + "/sync_dir_" + std::string(username);
   std::vector<file_info> files;
 
   switch (command)
@@ -129,11 +129,11 @@ void command_solver(int command)
     break;
 
   case CODE_LISTSERV:
+    manager.sendListFilesRequest(username);
     //close_session();
     break;
 
   case CODE_LISTCLI:
-    absolutePath = std::string(realpath(pasta, NULL)) + "/sync_dir_" + std::string(username);
     files = ListFiles::listFilesAt(absolutePath);
     ListFiles::print(absolutePath, files);
     break;

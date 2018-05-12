@@ -16,6 +16,7 @@ public:
     void get_file(char* file);
     void delete_file(char* file);
     int logout();
+    void sendListFilesRequest(std::string userName);
 
     std::string work_dir;
 

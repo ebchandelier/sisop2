@@ -60,6 +60,23 @@ void ClientConnectionManager::send_file(char* file)
         // TODO: Send ack
     }
 }
+
+void ClientConnectionManager::sendListFilesRequest(std::string userName)
+{
+    std::unique_lock<std::mutex> mlock(mutex);
+
+    // Send upload request
+    datagram request;
+    request.type = datagram_type::control;
+    request.control.action = control_actions::request_list_files;
+    strcpy(request.control.user.username, userName.c_str());
+    connector.send_package(request);
+
+    auto response = connector.receive_package();
+    // TODO: Check response
+
+}
+
 void ClientConnectionManager::get_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);

@@ -66,6 +66,9 @@ std::string DatagramStringifier::stringify(datagram package)
             case control_actions::accept_logout:
                 out += "accept_logout";
                     break;
+            case control_actions::request_list_files:
+                out += "request_lit_files";
+                break;
             default:
                 out += "corrupted (" + std::to_string((int)action) + ")";
         }
