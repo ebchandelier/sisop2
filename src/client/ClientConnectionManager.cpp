@@ -36,7 +36,6 @@ int	ClientConnectionManager::login_server(char* username, char* host, int port)
 void ClientConnectionManager::sync_client()
 {
     std::unique_lock<std::mutex> mlock(mutex);
-
     // Send sync request
     datagram sync_request;
     sync_request.type = datagram_type::control;

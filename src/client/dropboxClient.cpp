@@ -1,8 +1,9 @@
 #include "dropboxClient.h"
 #include "CheckFileChangesDaemonThread.h"
+#include "ClientFilesSynchronizer.h"
 #include "../shared/ListFiles.cpp"
 
-ClientConnectionManager manager;
+
 ClientUI ui;
 std::string username;
 char* endereco;
@@ -33,7 +34,9 @@ int main(int argc, char **argv)
     ui.success(SUCC_ARGS, username, endereco, porta);
   }
 
-  login_server((char *)username.c_str(), endereco, atoi(porta));
+  ClientConnectionManager manager;
+
+  login_server((char *)username.c_str(), endereco, atoi(porta), manager);
 
   running = 1;
   while(running)
@@ -43,13 +46,13 @@ int main(int argc, char **argv)
       command = ui.cmdline(UI_START);
     } else
       command = ui.cmdline(UI_DEFAULT);
-    command_solver(command);
+    command_solver(command, manager);
   }
 
   return 0;
 }
 
-int login_server(char* username, char* host, int port)
+int login_server(char* username, char* host, int port, ClientConnectionManager& manager)
 {
   int result = manager.login_server(username, host, port);
   if (result == 0)
@@ -65,7 +68,14 @@ int login_server(char* username, char* host, int port)
     // Do initial sync
     manager.sync_client();
 
-    // Start Daemon
+    // Start synchronizer daemon
+    //auto synchronizer = ClientFilesSynchronizer();
+    //synchronizer.manager = &manager;
+    std::thread([&manager]() {
+      ClientFilesSynchronizer().run(manager);
+    }).detach();
+
+    // Start folder watcher daemon
     CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread(manager);
     std::thread([&checkFileChangesDaemonThread, path](){
       checkFileChangesDaemonThread.run(path);
@@ -79,27 +89,27 @@ int login_server(char* username, char* host, int port)
   }
 }
 
-void sync_client()
+void sync_client(ClientConnectionManager& manager)
 {
   manager.sync_client();
 }
 
-void send_file(char* file)
+void send_file(char* file, ClientConnectionManager& manager)
 {
   manager.send_file(file);
 }
 
-void get_file(char* file)
+void get_file(char* file, ClientConnectionManager& manager)
 {
   manager.get_file(file);
 }
 
-void delete_file(char* file)
+void delete_file(char* file, ClientConnectionManager& manager)
 {
   manager.delete_file(file);
 }
 
-void close_session()
+void close_session(ClientConnectionManager& manager)
 {
   auto response = manager.logout();
   if (response == 0)
@@ -114,7 +124,7 @@ void close_session()
   running = false;
 }
 
-void command_solver(int command)
+void command_solver(int command, ClientConnectionManager& manager)
 {
   std::list<file_info> files;
   std::string absolutePath = std::string(realpath(pasta, NULL)) + "/sync_dir_" + std::string(username);
@@ -123,11 +133,11 @@ void command_solver(int command)
   {
 
   case CODE_UPLOAD:
-    send_file((char *)ui.get_parameter().c_str());
+    send_file((char *)ui.get_parameter().c_str(), manager);
     break;
 
   case CODE_DOWNLOAD:
-    get_file((char *)ui.get_parameter().c_str());
+    get_file((char *)ui.get_parameter().c_str(), manager);
     break;
 
   case CODE_LISTSERV:
@@ -141,11 +151,11 @@ void command_solver(int command)
     break;
 
   case CODE_SYNCDIR:
-    sync_client();
+    sync_client(manager);
     break;
 
   case CODE_EXIT:
-    close_session();
+    close_session(manager);
     break;
 
   default:
