@@ -12,6 +12,8 @@ std::string emptymsg;
 
 int command;
 
+bool running;
+
 
 int main(int argc, char **argv)
 {
@@ -33,7 +35,8 @@ int main(int argc, char **argv)
 
   login_server((char *)username.c_str(), endereco, atoi(porta));
 
-  while(true)
+  running = true;
+  while(running)
   {
     command = ui.cmdline(UI_START);
     command_solver(command);
@@ -100,6 +103,7 @@ void close_session()
     ui.warning("Server did not acknowledged the logout");
   }
   //checkFileChangesDaemonThread.kill();
+  running = false;
 }
 
 void command_solver(int command)
