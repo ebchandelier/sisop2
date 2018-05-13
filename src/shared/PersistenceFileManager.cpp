@@ -16,10 +16,11 @@ public:
         std::vector<datagram> datagramVector;
         std::streampos size = readToBuffer (fileName, memblock);
 
-        if(size == 0) {
-         
-            std::cout << "Error: could not read file " << fileName << "\n";
-        
+        if(size <= 0) {
+            
+            std::cout << "\nError: could not read file " << fileName << "\n";
+            return datagramVector;
+
         } else {
 
             int indexToStartReading = 0;
@@ -74,7 +75,7 @@ private:
 
     std::streampos readToBuffer(std::string fileName, char* buffer) {
         
-        std::streampos size;
+        std::streampos size = -1;
         std::ifstream file (fileName, std::ios::in| std::ios::ate);
         
         if (file.is_open()) {
