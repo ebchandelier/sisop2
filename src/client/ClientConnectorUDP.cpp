@@ -1,5 +1,9 @@
 #include "ClientConnectorUDP.h"
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 void ClientConnectorUDP::connect(std::string server_name, int port)
 {
 	// Get server
@@ -21,7 +25,7 @@ void ClientConnectorUDP::connect(std::string server_name, int port)
 	// Fill struct
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);
-	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	serv_addr.sin_addr.s_addr = inet_addr(server_name.c_str());
 	bzero(&(serv_addr.sin_zero), 8); 
 }
 
