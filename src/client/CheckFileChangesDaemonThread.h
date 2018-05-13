@@ -21,18 +21,13 @@
 class CheckFileChangesDaemonThread
 {
 public:
-    CheckFileChangesDaemonThread(ClientConnectionManager& clientConnectionManager) : clientConnectionManager(clientConnectionManager)
-    {
-    }
 
-    void run(std::string path);
+    void run(std::string path, ClientConnectionManager& clientConnectionManager);
 
 private:
 
     void checkFileChange(std::string path, ClientConnectionManager& clientConnectionManager);
 
     static std::vector<std::string> add_inotify_watch_recursive(int fd, std::string folder);
-
-    ClientConnectionManager& clientConnectionManager;
 
 };

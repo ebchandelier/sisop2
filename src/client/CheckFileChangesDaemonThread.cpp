@@ -1,6 +1,6 @@
 #include "CheckFileChangesDaemonThread.h"
 
-void CheckFileChangesDaemonThread::run(std::string path)
+void CheckFileChangesDaemonThread::run(std::string path, ClientConnectionManager& clientConnectionManager)
 {
     checkFileChange(path, clientConnectionManager);
 }

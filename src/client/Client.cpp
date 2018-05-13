@@ -53,19 +53,15 @@ int Client::login_server(char* username, char* host, int port)
     manager.sync_client();
 
     // Start synchronizer daemon
-    //auto synchronizer = ClientFilesSynchronizer();
-    //synchronizer.manager = &manager;
     std::thread([&]() {
       ClientFilesSynchronizer().run(manager);
     }).detach();
 
-    // Start folder watcher daemon
-    /*
-    CheckFileChangesDaemonThread checkFileChangesDaemonThread = CheckFileChangesDaemonThread(manager);
-    std::thread([&checkFileChangesDaemonThread, path](){
-      checkFileChangesDaemonThread.run(path);
+    // Start folder watcher daemon    
+    std::thread([&, path](){
+      CheckFileChangesDaemonThread().run(path, manager);
     }).detach();
-    */
+    
     return LOGIN_TRUE;
   } 
   else 
