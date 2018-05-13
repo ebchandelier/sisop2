@@ -65,7 +65,7 @@ void ClientConnectionManager::sync_client()
                 packages.push_back(package);
                 if (package.data.is_last)
                 {
-                    PersistenceFileManager().write("./" + file_name, packages);
+                    PersistenceFileManager().write(work_dir + "/" + file_name, packages);
                     break;
                 }
             }

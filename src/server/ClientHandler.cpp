@@ -86,7 +86,7 @@ void ClientHandler::run()
 					auto upload_request_response = incoming_packages->consume();
 					// TODO: Check response
 
-					auto packages = PersistenceFileManager().read(this->user_path + "/" + working_file_name);
+					auto packages = PersistenceFileManager().read(this->user_path + "/" + file.name);
 					for (auto package : packages)
 					{
 						outgoing_packages->produce(package);

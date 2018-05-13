@@ -12,12 +12,10 @@ void Server::run()
 	connector.init(port);
 	while(true)
 	{
-		// We process, at most, one incoming message and one outgoing message at a time,
-		// so if both buffers have data, the download/upload ratio will be 50/50.
 		try
 		{
-			process_incoming_messages();
-			process_outgoing_messages();
+			process_incoming_message();
+			process_outgoing_message();
 		} 
 		catch (std::exception e) 
 		{
@@ -32,7 +30,7 @@ void Server::create_root_folder_if_needed()
     system(command.c_str());
 }
 
-void Server::process_incoming_messages()
+void Server::process_incoming_message()
 {
 	// If the connector has a new package available
 	if (connector.has_new_package()) 
@@ -59,7 +57,7 @@ void Server::process_incoming_messages()
 		incoming_queues.at(client_id)->produce(package);
 	}
 }
-void Server::process_outgoing_messages()
+void Server::process_outgoing_message()
 {
 	// If one of the clientHandler has produced a package to be sent
 	if (!outgoing_packages.is_empty())

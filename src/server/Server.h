@@ -20,8 +20,8 @@ private:
     int port;
     std::string work_path;
 
-    void process_incoming_messages();
-    void process_outgoing_messages();
+    void process_incoming_message();
+    void process_outgoing_message();
 
     void create_root_folder_if_needed();
 
