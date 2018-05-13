@@ -66,7 +66,11 @@ public:
         }
 
         std::ofstream file (fileName, std::ios::out| std::ios::ate);
-        file.write(buffer, size);
+        
+        if (file.is_open()) {
+
+            file.write(buffer, size);
+        }
 
         file.close();
     }
@@ -91,8 +95,6 @@ private:
 
     datagram createSingleDatagram(std::streampos size, char* memblock, int indexToStartReading) {
         
-        // std::cout << "Creating data_gram de " << size << " bytes\n";
-
         data_datagram data;
         data.data_length = size;
 
@@ -121,6 +123,3 @@ private:
         return size;
     }
 };
-
-// class PersistClient extends PersistenceFileManager? To manage userName folder etc
-// class PersistServer extends PersistenceFileManager
