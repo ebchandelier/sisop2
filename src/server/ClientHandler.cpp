@@ -1,13 +1,10 @@
 #include "ClientHandler.h"
-#include "../shared/ListFiles.cpp"
 
 ClientHandler::ClientHandler(std::string base_path, ThreadSafeQueue<datagram>* incoming_packages, OutgoingPackages* outgoing_packages)
 {
     this->incoming_packages = incoming_packages;
     this->outgoing_packages = outgoing_packages;
 	this->base_path = base_path;
-	printf("ClientHandler path is %s\n", base_path.c_str());
-	
 }
 
 void ClientHandler::run()

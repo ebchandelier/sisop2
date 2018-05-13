@@ -2,12 +2,13 @@
 #include <list>
 #include <string>
 #include "ThreadSafeQueue.h"
+#include "OutgoingPackages.h"
 #include "../shared/datagram.h"
 #include "../shared/DatagramStringifier.h"
 #include "../shared/PersistenceFileManager.cpp"
-#include "OutgoingPackages.h"
 #include "../shared/fileInfo.h"
 #include "../shared/FileInfoVectorSerializer.h"
+#include "../shared/ListFiles.h"
 
 enum class ClientHandlerState
 {

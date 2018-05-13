@@ -1,10 +1,9 @@
 #pragma once
 #include "ClientUI.h"
 #include "ClientConnectionManager.h"
-#include "dropboxClient.h"
 #include "CheckFileChangesDaemonThread.h"
 #include "ClientFilesSynchronizer.h"
-#include "../shared/ListFiles.cpp"
+#include "../shared/ListFiles.h"
 // #include "CheckFileChangesDaemonThread.cpp"
 #include <string>
 
