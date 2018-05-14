@@ -24,14 +24,14 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConne
                 {
                     if (event->mask & IN_ISDIR) 
                     {
-                        std::cout << "The directory " << event->name << " was Created\n";
+                        //std::cout << "The directory " << event->name << " was Created\n";
                         std::string newPath = path + "/" + std::string(event->name);
                         int anotherWd = inotify_add_watch(fd, newPath.c_str(), FILTERS);
                         wdVector.push_back(newPath);
                     } 
                     else 
                     {
-                        std::cout << "The file " << event->name << " was Created\n";
+                        //std::cout << "The file " << event->name << " was Created\n";
                         std::string fileName(event->name);
                         std::string filePath = path + "/" + fileName;
                         clientConnectionManager.send_file((char *)filePath.c_str());   
@@ -41,10 +41,10 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConne
                 {
                     if (event->mask & IN_ISDIR) 
                     {
-                        std::cout << "The directory " << event->name << " was modified\n";      
+                        //std::cout << "The directory " << event->name << " was modified\n";      
                     } else 
                     {
-                        std::cout << "The file " << event->name << " was modified\n";      
+                        //std::cout << "The file " << event->name << " was modified\n";      
                     }
                 }
                 if ( event->mask & IN_DELETE || event->mask & IN_MOVE) 
@@ -52,10 +52,10 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConne
                     // event->mask == IN_MOVED_TO due to a gnome bug, see https://github.com/cooltronics/NFC_device/issues/2
                     if (event->mask & IN_ISDIR) 
                     {
-                        std::cout << "The directory " << event->name << " was deleted\n";      
+                        //std::cout << "The directory " << event->name << " was deleted\n";      
                     } else 
                     {
-                        std::cout << "The file " << event->name << " was deleted\n";      
+                        //std::cout << "The file " << event->name << " was deleted\n";      
                     }
                 } 
                 i += EVENT_SIZE + event->len;

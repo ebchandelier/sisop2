@@ -77,11 +77,19 @@ void ClientConnectionManager::send_file(char* file)
     std::unique_lock<std::mutex> mlock(mutex);
     auto packages = PersistenceFileManager().read(file);
 
+    // Extract filename from path
+    std::string file_name(file);
+    auto last_slash = file_name.find_last_of("/");
+    if (last_slash != std::string::npos)
+    {
+        file_name = file_name.substr(last_slash);
+    }
+
     // Send upload request
     datagram request;
     request.type = datagram_type::control;
     request.control.action = control_actions::request_upload;
-    strcpy(request.control.file.filename, file);
+    strcpy(request.control.file.filename, file_name.c_str());
     connector.send_package(request);
 
     auto response = connector.receive_package();
