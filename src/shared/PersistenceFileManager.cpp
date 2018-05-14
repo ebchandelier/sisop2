@@ -16,7 +16,7 @@ public:
         std::vector<datagram> datagramVector;
         std::streampos size = readToBuffer (fileName, memblock);
 
-        if(size <= 0) {
+        if(size < 0) {
             
             std::cout << "\nError: could not read file " << fileName << "\n";
             return datagramVector;
@@ -43,7 +43,10 @@ public:
 
         }
 
-        datagramVector.back().data.is_last = true;
+        if(size > 0) {
+
+            datagramVector.back().data.is_last = true;
+        }
 
         return datagramVector;
     }

@@ -121,11 +121,9 @@ int ClientUI::cmdline(int ui_code)
   default:
     std::cout << "BAD CALL;" ;
     break;
-
   }
 
   return command_to_main;
-
 }
 
 void ClientUI::cmdline_input()

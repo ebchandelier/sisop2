@@ -32,9 +32,9 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConne
                     else 
                     {
                         std::cout << "The file " << event->name << " was Created\n";
-                        std::string path(event->name);
-                        path = "./" + path;
-                        clientConnectionManager.send_file((char *)path.c_str());   
+                        std::string fileName(event->name);
+                        std::string filePath = path + "/" + fileName;
+                        clientConnectionManager.send_file((char *)filePath.c_str());   
                     }
                 }
                 if ( event->mask & IN_MODIFY) 
