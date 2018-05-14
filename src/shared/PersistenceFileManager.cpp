@@ -43,10 +43,13 @@ public:
 
         }
 
-        if(size > 0) {
+        if(size == 0) {
 
-            datagramVector.back().data.is_last = true;
+            datagram theOnlyOne = createEmptyDatagram();
+            datagramVector.push_back(theOnlyOne);
         }
+        
+        datagramVector.back().data.is_last = true;
 
         return datagramVector;
     }
@@ -103,6 +106,19 @@ private:
 
         data.package_id = indexToStartReading;
         std::memcpy(data.buffer, memblock + indexToStartReading*DATA_BUFFER_SIZE, size);
+
+        datagram dataGram;
+        dataGram.type = datagram_type::data;
+        dataGram.data = data;
+        dataGram.data.is_last = false;
+
+        return dataGram;
+    }
+
+    datagram createEmptyDatagram() {
+        
+        data_datagram data;
+        data.data_length = 0;
 
         datagram dataGram;
         dataGram.type = datagram_type::data;
