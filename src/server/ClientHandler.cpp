@@ -65,6 +65,22 @@ void ClientHandler::run()
 				FileInfoVectorSerializer().serialize(response.control.list_files_response.data, files);
 				outgoing_packages->produce(response);
 			}
+			if (package.control.action == control_actions::request_exclude)
+			{
+				// Delete file
+				auto file_path = this->user_path + "/" + std::string(package.control.file.filename);
+				auto success = remove(file_path.c_str());
+				if (success != 0)
+				{
+					printf("Failed to delete file\n");
+					// TODO: handle
+				}
+				// Accept
+				datagram response;
+				response.type = datagram_type::control;
+				response.control.action = control_actions::accept_exclude;
+				outgoing_packages->produce(response);
+			}
 			if (package.control.action == control_actions::request_sync_dir)
 			{
 				// Confirm Sync

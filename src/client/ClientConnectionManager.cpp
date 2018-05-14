@@ -82,7 +82,7 @@ void ClientConnectionManager::send_file(char* file)
     auto last_slash = file_name.find_last_of("/");
     if (last_slash != std::string::npos)
     {
-        file_name = file_name.substr(last_slash);
+        file_name = file_name.substr(last_slash + 1);
     }
 
     // Send upload request
@@ -151,6 +151,24 @@ void ClientConnectionManager::get_file(char* file)
 void ClientConnectionManager::delete_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
+
+    // Extract filename from path
+    std::string file_name(file);
+    auto last_slash = file_name.find_last_of("/");
+    if (last_slash != std::string::npos)
+    {
+        file_name = file_name.substr(last_slash + 1);
+    }
+
+    // Send delete request
+    datagram request;
+    request.type = datagram_type::control;
+    request.control.action = control_actions::request_exclude;
+    strcpy(request.control.file.filename, file_name.c_str());
+    connector.send_package(request);
+
+    // Get response
+    connector.receive_package();
 }
 int ClientConnectionManager::logout()
 {

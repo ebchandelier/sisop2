@@ -78,6 +78,12 @@ std::string DatagramStringifier::stringify(datagram package)
             case control_actions::accept_sync_dir:
                 out += "accept_sync_dir";
                 break;
+            case control_actions::request_exclude:
+                out += "request_exclude";
+                break;
+            case control_actions::accept_exclude:
+                out += "accept_exclude";
+                break;
             default:
                 out += "corrupted (" + std::to_string((int)action) + ")";
         }

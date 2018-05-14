@@ -55,7 +55,10 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, ClientConne
                         //std::cout << "The directory " << event->name << " was deleted\n";      
                     } else 
                     {
-                        //std::cout << "The file " << event->name << " was deleted\n";      
+                        //std::cout << "The file " << event->name << " was deleted\n";
+                        std::string fileName(event->name);
+                        std::string filePath = path + "/" + fileName;
+                        clientConnectionManager.delete_file((char *)filePath.c_str());
                     }
                 } 
                 i += EVENT_SIZE + event->len;

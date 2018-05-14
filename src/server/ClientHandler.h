@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include <string>
+#include <stdio.h>
 #include "ThreadSafeQueue.h"
 #include "OutgoingPackages.h"
 #include "../shared/datagram.h"
