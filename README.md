@@ -1,4 +1,8 @@
 Trabalho de Sistemas Operacionais 2
 
-Eduardo Bassani Chandelier
 Alfeu Uzai Tavares
+Diego Dasso Migotto
+Eduardo Bassani Chandelier
+Gabriel Allegretti
+
+
