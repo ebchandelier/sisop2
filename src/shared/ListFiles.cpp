@@ -1,8 +1,8 @@
 #include "ListFiles.h"
 
-std::list<file_info> ListFiles::listFilesAt(std::string path) 
+DeviceFilesInfo ListFiles::listFilesAt(std::string path) 
 {
-    std::list<file_info> files;
+    DeviceFilesInfo files;
     struct dirent *dp;
     DIR *dirp = opendir(path.c_str());
         
@@ -12,22 +12,21 @@ std::list<file_info> ListFiles::listFilesAt(std::string path)
         {
             file_info file;
             file.name = dp->d_name;
-            // get type?
-
-            files.push_back(file);
+            file.version = 1;
+            files.set(file);
         }
     }
         
     closedir(dirp);
 
-
     return files;
 }
 
-void ListFiles::print(std::list<file_info> files) {
+void ListFiles::print(DeviceFilesInfo& device_files) 
+{
     std::cout << "\nListing Files:\n";
-    for(auto file : files) 
+    for(auto file : device_files.files) 
     {
-        std::cout << file.name << "\n";
+        std::cout << file.name << "\tVersion: " << std::to_string(file.version) << "\n";
     }
 }

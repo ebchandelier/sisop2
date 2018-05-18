@@ -9,7 +9,7 @@
 #include <dirent.h>
 #include <stdio.h>
 
-#include "./../shared/datagram.h"
+#include "../shared/DeviceFilesInfo.h"
 #include "ClientConnectionManager.h"
 
 #define MAX_EVENTS 1024 
@@ -22,11 +22,11 @@ class CheckFileChangesDaemonThread
 {
 public:
 
-    void run(std::string path, ClientConnectionManager& clientConnectionManager);
+    void run(std::string path, DeviceFilesInfo& files_info);
 
 private:
 
-    void checkFileChange(std::string path, ClientConnectionManager& clientConnectionManager);
+    void checkFileChange(std::string path, DeviceFilesInfo& files_info);
 
     static std::vector<std::string> add_inotify_watch_recursive(int fd, std::string folder);
 

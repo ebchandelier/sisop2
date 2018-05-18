@@ -38,19 +38,46 @@ void ClientHandler::run()
 			}
 			if (package.control.action == control_actions::request_upload)
 			{
+				// Read file info
+				upload_fileinfo.name = package.control.upload_request_data.filename;
+				upload_fileinfo.version = package.control.upload_request_data.version;
+
+				// Prepare state
+				buffer.clear();
+				state = ClientHandlerState::receiving_file;
+
+				// Accept upload
 				datagram response;
 				response.type = datagram_type::control;
 				response.control.action = control_actions::accept_upload;
-
-				working_file_name = package.control.file.filename;
 				outgoing_packages->produce(response);
-				buffer.clear();
-				state = ClientHandlerState::receiving_file;
 			}
 			if (package.control.action == control_actions::request_download)
 			{
-				working_file_name = package.control.file.filename;
-				auto packages = PersistenceFileManager().read(this->user_path + "/" + working_file_name);
+				// Check if the file is valid
+				if (!device_files.has(package.control.download_request_data.filename))
+				{
+					// Deny if not
+					datagram deny_request;
+					deny_request.type = datagram_type::control;
+					deny_request.control.action = control_actions::deny_download;
+					strcpy(deny_request.control.download_deny_data.message, "File does not exits");
+					outgoing_packages->produce(deny_request);
+					return;
+				}
+
+				// Read file from disk
+				auto file = device_files.get(package.control.download_request_data.filename);
+				auto packages = PersistenceFileManager().read(this->user_path + "/" + file.name);
+
+				// Accept download request
+				datagram accept_request;
+				accept_request.type = datagram_type::control;
+				accept_request.control.action = control_actions::accept_download;
+				accept_request.control.download_accept_data.version = file.version;
+				outgoing_packages->produce(accept_request);
+
+				// Send file
 				for (auto package : packages)
 				{
 					outgoing_packages->produce(package);
@@ -68,7 +95,7 @@ void ClientHandler::run()
 			if (package.control.action == control_actions::request_exclude)
 			{
 				// Delete file
-				auto file_path = this->user_path + "/" + std::string(package.control.file.filename);
+				auto file_path = this->user_path + "/" + std::string(package.control.exclude_request_data.filename);
 				auto success = remove(file_path.c_str());
 				if (success != 0)
 				{
@@ -81,9 +108,11 @@ void ClientHandler::run()
 				response.control.action = control_actions::accept_exclude;
 				outgoing_packages->produce(response);
 			}
+			/*
 			if (package.control.action == control_actions::request_sync_dir)
 			{
 				// Confirm Sync
+				
 				auto files = ListFiles::listFilesAt(this->user_path);
 				datagram response;
 				response.type = datagram_type::control;
@@ -108,7 +137,9 @@ void ClientHandler::run()
 						outgoing_packages->produce(package);
 					}
 				}
+				
 			}
+			*/
 		}
 		else if (package.type == datagram_type::data)
 		{
@@ -116,14 +147,15 @@ void ClientHandler::run()
 			if (package.data.is_last)
 			{
 				// Write file to disk
-				auto full_file_path = this->user_path + "/" + working_file_name;
+				auto full_file_path = this->user_path + "/" + upload_fileinfo.name;
 				PersistenceFileManager().write(full_file_path, buffer);
-				buffer.clear();
 
-				// Add file to list
-				file_info file;
-				file.name = working_file_name;
-				files.push_back(file);
+				// Add file to the set
+				device_files.set(upload_fileinfo);
+
+				// Clear state
+				buffer.clear();
+				state = ClientHandlerState::other;
 			}
 		}
     }
