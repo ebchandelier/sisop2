@@ -50,16 +50,18 @@ int Client::login_server(char* username, char* host, int port)
     manager.work_dir = path;
 
     // Do initial sync
-    manager.sync_client();
+    // TODO: This should be another method, with another resolution algorithm
+    //manager.sync_client();
+    //device_files = ListFiles::listFilesAt(pasta);
 
     // Start synchronizer daemon
     std::thread([&]() {
       ClientFilesSynchronizer().run(manager);
     }).detach();
     
-    // Start folder watcher daemon    
+    // Start folder watcher daemon
     std::thread([&, path](){
-      CheckFileChangesDaemonThread().run(path, manager);
+      CheckFileChangesDaemonThread().run(path, device_files);
     }).detach();
     
     return LOGIN_TRUE;
@@ -108,7 +110,7 @@ void Client::close_session()
 
 void Client::command_solver(int command)
 {
-  std::list<file_info> files;
+  DeviceFilesInfo files;
   std::string absolutePath = std::string(realpath(pasta, NULL)) + "/sync_dir_" + std::string(username);
 
   switch (command)
@@ -123,13 +125,14 @@ void Client::command_solver(int command)
     break;
 
   case CODE_LISTSERV:
-    files = manager.sendListFilesRequest();
-    ListFiles::print(files);
+  {
+    DeviceFilesInfo s = manager.sendListFilesRequest();
+    ListFiles::print(s);
     break;
+  }
 
   case CODE_LISTCLI:
-    files = ListFiles::listFilesAt(absolutePath);
-    ListFiles::print(files);
+    ListFiles::print(device_files);
     break;
 
   case CODE_SYNCDIR:
