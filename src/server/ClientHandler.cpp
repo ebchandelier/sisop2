@@ -144,7 +144,19 @@ void ClientHandler::run()
 		}
 		else if (package.type == datagram_type::data)
 		{
-			buffer.push_back(package);
+			// Just add if it is the next package
+			if(package.data.package_id == buffer.size()) {
+
+				buffer.push_back(package);
+			}
+
+			// Send ack
+			datagram ack;
+			ack.type = datagram_type::control;
+			ack.control.action = control_actions::ack;
+			ack.control.last_id_received_with_success = buffer.size()-1;
+			outgoing_packages->produce(ack);
+
 			if (package.data.is_last)
 			{
 				// Write file to disk

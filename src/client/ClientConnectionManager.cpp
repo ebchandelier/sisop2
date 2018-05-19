@@ -77,11 +77,20 @@ void ClientConnectionManager::internal_send_file(char* file_name)
     auto response = connector.receive_package();
     // TODO: Check response
 
-    for (auto package : packages)
-    {
+    int i = 0;
+    do {
+
+        auto package = packages.at(i);
         std::cout << DatagramStringifier().stringify(package);
         connector.send_package(package);
-    }
+        datagram response = connector.receive_package();
+        if(response.type == datagram_type::control && response.control.action == control_actions::ack) {
+
+            i = response.control.last_id_received_with_success + 1;
+        }
+
+    } while(i < packages.size());
+    
     device_files.set(file__info);
 }
 

@@ -52,12 +52,12 @@ int Client::login_server(char* username, char* host, int port)
     // Do initial sync
     // TODO: This should be another method, with another resolution algorithm
     //manager.sync_client();
-    //device_files = ListFiles::listFilesAt(pasta);
+    device_files = ListFiles::listFilesAt(path);
 
     // Start synchronizer daemon
-    std::thread([&]() {
-      ClientFilesSynchronizer().run(manager);
-    }).detach();
+    // std::thread([&]() {
+    //   ClientFilesSynchronizer().run(manager);
+    // }).detach();
     
     // Start folder watcher daemon
     std::thread([&, path](){

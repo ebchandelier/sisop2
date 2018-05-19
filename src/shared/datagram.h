@@ -110,6 +110,9 @@ typedef struct
 
         // Sync dir
         control_sync_dir_response_data sync_dir_response;
+
+        // ack
+        int last_id_received_with_success;
     };
 
 } control_datagram;
