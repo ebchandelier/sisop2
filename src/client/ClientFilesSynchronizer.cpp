@@ -5,7 +5,7 @@ void ClientFilesSynchronizer::run(ClientConnectionManager& manager)
 {
     while(true)
     {
-        sleep(5);
-        //manager.sync_client();
+        sleep(8);
+        manager.sync_client();
     }
 }

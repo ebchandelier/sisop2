@@ -28,14 +28,14 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFiles
                     } 
                     else
                     {
-                        //std::cout << "The file " << event->name << " was Created\n";
+                        std::cout << "The file " << event->name << " was Created\n";
                         file_info file;
                         file.name = event->name;
                         file.version = 1;
                         files_info.set(file);
                     }
                 }
-                if (event->mask & IN_MODIFY)
+                if (event->mask & IN_CLOSE_WRITE)
                 {
                     if (event->mask & IN_ISDIR)
                     {
@@ -43,10 +43,21 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFiles
                     }
                     else
                     {
-                        //std::cout << "The file " << event->name << " was modified\n";
-                        auto file = files_info.get(event->name);
-                        file.version++;
-                        files_info.set(file); 
+                        std::cout << "The file " << event->name << " was modified\n";
+                        if (files_info.has(event->name))
+                        {
+                            auto file = files_info.get(event->name);
+                            file.version++;
+                            files_info.set(file); 
+                        }
+                        else
+                        {
+                            file_info file;
+                            file.name = event->name;
+                            file.version = 1;
+                            files_info.set(file);
+                        }
+                        
                     }
                 }
                 if (event->mask & IN_DELETE || event->mask & IN_MOVE)

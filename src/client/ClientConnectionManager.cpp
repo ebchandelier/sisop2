@@ -36,7 +36,7 @@ int	ClientConnectionManager::login_server(char* username, char* host, int port)
 void ClientConnectionManager::sync_client()
 {
     std::unique_lock<std::mutex> mlock(mutex);
-    auto server_files = sendListFilesRequest();
+    auto server_files = internal_sendListFilesRequest();
     resolve_diff(device_files, server_files);
 }
 void ClientConnectionManager::send_file(char* file)
@@ -45,17 +45,14 @@ void ClientConnectionManager::send_file(char* file)
     internal_send_file(file);
 }
 
-void ClientConnectionManager::internal_send_file(char* file)
+void ClientConnectionManager::internal_send_file(char* file_name)
 {
-    auto packages = PersistenceFileManager().read(file);
-
+    printf("sending file %s\n", file_name);
     // Extract filename from path
-    std::string file_name(file);
-    auto last_slash = file_name.find_last_of("/");
-    if (last_slash != std::string::npos)
-    {
-        file_name = file_name.substr(last_slash + 1);
-    }
+    std::string path = std::string(work_dir) + "/" + std::string(file_name);
+    
+    // Read file
+    auto packages = PersistenceFileManager().read(path);
 
     // Setup file_info
     file_info file__info;
@@ -74,7 +71,7 @@ void ClientConnectionManager::internal_send_file(char* file)
     request.type = datagram_type::control;
     request.control.action = control_actions::request_upload;
     request.control.upload_request_data.version = file__info.version;
-    strcpy(request.control.upload_request_data.filename, file_name.c_str());
+    strcpy(request.control.upload_request_data.filename, file_name);
     connector.send_package(request);
 
     auto response = connector.receive_package();
@@ -88,10 +85,8 @@ void ClientConnectionManager::internal_send_file(char* file)
     device_files.set(file__info);
 }
 
-DeviceFilesInfo ClientConnectionManager::sendListFilesRequest()
+DeviceFilesInfo ClientConnectionManager::internal_sendListFilesRequest()
 {
-    std::unique_lock<std::mutex> mlock(mutex);
-
     // Send upload request
     datagram request;
     request.type = datagram_type::control;
@@ -102,6 +97,12 @@ DeviceFilesInfo ClientConnectionManager::sendListFilesRequest()
     return FileInfoVectorSerializer().deserialize(response.control.list_files_response.data);
 }
 
+DeviceFilesInfo ClientConnectionManager::sendListFilesRequest()
+{
+    std::unique_lock<std::mutex> mlock(mutex);
+    return internal_sendListFilesRequest();
+}
+
 void ClientConnectionManager::get_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
@@ -110,6 +111,7 @@ void ClientConnectionManager::get_file(char* file)
 
 void ClientConnectionManager::internal_get_file(char* file_name)
 {
+    printf("getting file %s\n", file_name);
     // Send download request
     datagram request;
     request.type = datagram_type::control;
@@ -145,7 +147,7 @@ void ClientConnectionManager::internal_get_file(char* file_name)
         }
         else if (response.control.action == control_actions::deny_download)
         {
-            printf("Error on downloading file: %s\n", response.control.download_deny_data.message);
+            printf("Error on downloading file %s: %s\n", file_name, response.control.download_deny_data.message);
         }
     }
 }
@@ -200,7 +202,7 @@ int ClientConnectionManager::logout()
 void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server)
 {
     auto files_union = DeviceFilesInfo::common_files(client, server);
-    for (const auto& file : files_union)
+    for (const auto file : files_union)
     {
         auto has_client = client.has(file);
         auto has_server = server.has(file);
@@ -219,11 +221,17 @@ void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesIn
             auto server_file = server.get(file);
             if (client_file.version > server_file.version)
             {
+                printf("calling internal_send_file with %s\n", file.c_str());
                 internal_send_file((char *)file.c_str());
             }
             if (client_file.version < server_file.version)
             {
                 internal_get_file((char *)file.c_str());
+                // Decrement version, so when we write it back, 
+                // the inotify thread will increase the version again
+                auto info = device_files.get(file);
+                info.version--;
+                device_files.set(info);
             }
             // Otherwise, the version is the same and nothing needs to be done
         }

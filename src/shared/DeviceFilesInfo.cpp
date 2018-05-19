@@ -38,11 +38,11 @@ std::vector<std::string> DeviceFilesInfo::common_files(
     DeviceFilesInfo& f2)
 {
     std::vector<std::string> result;
-    for (auto& file : f1.files)
+    for (auto file : f1.files)
     {
         result.push_back(file.name);
     }
-    for (auto& file : f2.files)
+    for (auto file : f2.files)
     {
         if (!f1.has(file.name))
         {

@@ -74,6 +74,7 @@ void ClientHandler::run()
 				datagram accept_request;
 				accept_request.type = datagram_type::control;
 				accept_request.control.action = control_actions::accept_download;
+				strcpy(accept_request.control.download_accept_data.filename, file.name.c_str());
 				accept_request.control.download_accept_data.version = file.version;
 				outgoing_packages->produce(accept_request);
 

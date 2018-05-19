@@ -16,7 +16,7 @@
 #define EVENT_SIZE (sizeof(struct inotify_event)) 
 #define BUF_LEN (MAX_EVENTS*(EVENT_SIZE+MAXIMUM_FILE_NAME)) 
 
-#define FILTERS IN_CREATE|IN_DELETE|IN_MODIFY|IN_MOVE
+#define FILTERS IN_CREATE|IN_DELETE|IN_CLOSE_WRITE|IN_MOVE
 
 class CheckFileChangesDaemonThread
 {

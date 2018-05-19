@@ -33,6 +33,7 @@ private:
     // inside the class
     void internal_send_file(char* file);
     void internal_get_file(char* file);
+    DeviceFilesInfo internal_sendListFilesRequest();
 
     void resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server);
 
