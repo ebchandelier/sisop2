@@ -140,7 +140,18 @@ void ClientConnectionManager::internal_get_file(char* file_name)
             while(true)
             {
                 auto package = connector.receive_package();
-                packages.push_back(package);
+                if(package.data.package_id == packages.size()) { 
+ 
+                    packages.push_back(package);
+                }
+
+                // Send ack 
+                datagram ack; 
+                ack.type = datagram_type::control; 
+                ack.control.action = control_actions::ack; 
+                ack.control.last_id_received_with_success = packages.size()-1; 
+                connector.send_package(ack); 
+
                 if (package.data.is_last)
                 {
                     break;

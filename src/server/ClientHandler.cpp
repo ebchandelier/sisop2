@@ -79,10 +79,19 @@ void ClientHandler::run()
 				outgoing_packages->produce(accept_request);
 
 				// Send file
-				for (auto package : packages)
-				{
+				int i = 0;
+				do {
+
+					auto package = packages.at(i);
 					outgoing_packages->produce(package);
-				}
+					datagram response = incoming_packages->consume();
+					if(response.type == datagram_type::control && response.control.action == control_actions::ack) {
+
+						i = response.control.last_id_received_with_success + 1;
+					}
+				
+				} while(i < packages.size());
+
 			}
 			if (package.control.action == control_actions::request_list_files)
 			{
