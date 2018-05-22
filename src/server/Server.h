@@ -4,11 +4,14 @@
 #include <thread>
 #include "ServerConnectorUDP.h"
 #include "../shared/DatagramStringifier.h"
+#include "../shared/DeviceFilesInfo.h"
 #include "ClientHandler.h"
 #include "ThreadSafeQueue.h"
 
 #define MAXIMUM_PACKAGES_QUEUE_SIZE 100
 
+typedef uint32_t client_id_t;
+typedef std::string user_t;
 
 class Server
 {
@@ -27,8 +30,9 @@ private:
 
     DatagramStringifier stringifier;
     ServerConnectorUDP connector;
-    std::map<uint32_t, ClientHandler> handlers;
-	std::map<uint32_t, ThreadSafeQueue<datagram>*> incoming_queues;
+    std::map<client_id_t, ClientHandler> handlers;
+    std::map<user_t, DeviceFilesInfo> device_files;
+	std::map<client_id_t, ThreadSafeQueue<datagram>*> incoming_queues;
 	ThreadSafeQueue<std::pair<sockaddr_in, datagram>> outgoing_packages;
 
 };

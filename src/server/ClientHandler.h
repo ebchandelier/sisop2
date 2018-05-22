@@ -7,13 +7,14 @@
 #include "../shared/datagram.h"
 #include "../shared/DatagramStringifier.h"
 #include "../shared/PersistenceFileManager.cpp"
-#include "../shared/fileInfo.h"
+#include "../shared/DeviceFilesInfo.h"
 #include "../shared/FileInfoVectorSerializer.h"
 #include "../shared/ListFiles.h"
 
 enum class ClientHandlerState
 {
-    receiving_file
+    receiving_file,
+    other
 };
 
 class ClientHandler
@@ -25,7 +26,9 @@ public:
 
 private:
 
-    std::list<file_info> files;
+    DeviceFilesInfo device_files;
+
+    file_info upload_fileinfo;
 
     ThreadSafeQueue<datagram> *incoming_packages;
     OutgoingPackages *outgoing_packages;

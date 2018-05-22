@@ -72,12 +72,6 @@ std::string DatagramStringifier::stringify(datagram package)
             case control_actions::accept_list_files:
                 out += "accept_list_files";
                 break;
-            case control_actions::request_sync_dir:
-                out += "request_sync_dir";
-                break;
-            case control_actions::accept_sync_dir:
-                out += "accept_sync_dir";
-                break;
             case control_actions::request_exclude:
                 out += "request_exclude";
                 break;
@@ -89,33 +83,28 @@ std::string DatagramStringifier::stringify(datagram package)
         }
         out += "\"\n";
 
-        if (package.control.action == control_actions::request_login)
+        switch (package.control.action)
         {
-            out += "username: \"";
-            out.append(package.control.login_request_data.username);
-            out += "\"\n";
-        }
-        if (package.control.action == control_actions::accept_list_files)
-        {
-            char data[DATA_BUFFER_SIZE];
-            strncpy(data, package.control.list_files_response.data, DATA_BUFFER_SIZE);
-            out += "files: \"";
-            out += data;
-            out += "\"\n";
-        }
-        if (package.control.action == control_actions::request_download ||
-            package.control.action == control_actions::request_upload ||
-            package.control.action == control_actions::request_exclude)
-        {
-            out += "file: \"";
-            out.append(package.control.file.filename);
-            out += "\"\n";
-        }
-        if (package.control.action == control_actions::accept_sync_dir)
-        {
-            out += "files_count: \"";
-            out += std::to_string(package.control.sync_dir_response.files_count);
-            out += "\"\n";
+            case control_actions::request_login:
+                out += add_username(package.control.login_request_data.username);
+                break;
+            case control_actions::request_upload:
+                out += add_file(package.control.upload_request_data.filename);
+                out += add_version(package.control.upload_request_data.version);
+                break;
+            case control_actions::accept_download:
+                out += add_file(package.control.download_accept_data.filename);
+                out += add_version(package.control.download_accept_data.version);
+                break;
+            case control_actions::request_download:
+                out += add_file(package.control.download_request_data.filename);
+                break;
+            case control_actions::request_exclude:
+                out += add_file(package.control.exclude_request_data.filename);
+                break;
+            case control_actions::accept_list_files:
+                out += add_files(package.control.list_files_response.data);
+                break;
         }
     }
     if (package.type == datagram_type::data)
@@ -126,5 +115,43 @@ std::string DatagramStringifier::stringify(datagram package)
     }
 
 
+    return out;
+}
+
+std::string DatagramStringifier::add_version(int version)
+{
+    std::string out;
+    out += "Version: \"";
+    out += std::to_string(version);
+    out += "\"\n";
+    return out;
+}
+
+std::string DatagramStringifier::add_username(char* username)
+{
+    std::string out;
+    out += "username: \"";
+    out += username;
+    out += "\"\n";
+    return out;
+}
+
+std::string DatagramStringifier::add_file(char* buffer)
+{
+    std::string out;
+    out += "file: \"";
+    out.append(buffer);
+    out += "\"\n";
+    return out;
+}
+
+std::string DatagramStringifier::add_files(char* buffer)
+{
+    std::string out;
+    char data[DATA_BUFFER_SIZE];
+    strncpy(data, buffer, DATA_BUFFER_SIZE);
+    out += "files: \"";
+    out += data;
+    out += "\"\n";
     return out;
 }
