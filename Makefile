@@ -1,10 +1,10 @@
-all: client server
+all: dropboxClient.out dropboxServer.out
 
-client:
+dropboxClient.out: ./src/client/*  ./src/shared/*
 	g++ -std=c++11 -o dropboxClient.out -pthread ./src/client/*  ./src/shared/*
 
-server:
+dropboxServer.out: ./src/server/* ./src/shared/*
 	g++ -std=c++11 -o dropboxServer.out -pthread ./src/server/* ./src/shared/*
 
-clean:
-	rm ./dropboxClient.out rm ./dropboxServer.out
+clean: ./dropboxClient.out ./dropboxServer.out
+	rm ./dropboxClient.out ./dropboxServer.out
