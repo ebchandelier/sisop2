@@ -8,7 +8,8 @@
 enum class datagram_type
 {
     control,
-    data
+    data,
+    ack
 };
 
 enum class control_actions
@@ -40,8 +41,6 @@ enum class control_actions
     request_list_files,
     accept_list_files,
     deny_list_files,
-
-    ack
 };
 
 enum class user_type
@@ -89,6 +88,7 @@ typedef struct
 typedef struct
 {
     control_actions action;
+    uint32_t package_id;
     union {
         // Login
         control_login_data login_response_data;
@@ -131,6 +131,7 @@ typedef struct
     union {
         data_datagram data;
         control_datagram control;
+        uint32_t ack_last_package_id_received;
     };
 } datagram;
 

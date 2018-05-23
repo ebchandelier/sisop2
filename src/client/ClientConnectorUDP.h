@@ -29,6 +29,8 @@ public:
 
 private:
     int sockfd, n;
+	int lastReceivedPackageId;
+	int lastSentPackageId = 0;
 	unsigned int length;
 	struct sockaddr_in serv_addr, from;
 	struct hostent *server;

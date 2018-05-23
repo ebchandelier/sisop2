@@ -37,6 +37,9 @@ private:
 	socklen_t clilen;
 	struct sockaddr_in serv_addr, cli_addr;
 
+	int lastReceivedPackageId;
+	int lastSentPackageId = 0;
+
 	bool new_package = false;
 	datagram package;
 };
