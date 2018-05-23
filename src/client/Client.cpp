@@ -55,11 +55,11 @@ int Client::login_server(char* username, char* host, int port)
     //device_files = ListFiles::listFilesAt(pasta);
 
     // Start synchronizer daemon
-    std::thread([&]() {
-      ClientFilesSynchronizer().run(manager);
-    }).detach();
+    // std::thread([&]() {
+    //   ClientFilesSynchronizer().run(manager);
+    // }).detach();
     
-    // Start folder watcher daemon
+    // // Start folder watcher daemon
     std::thread([&, path](){
       CheckFileChangesDaemonThread().run(path, device_files);
     }).detach();
