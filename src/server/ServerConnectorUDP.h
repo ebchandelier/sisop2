@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <utility>
 #include <fcntl.h>
+#include<vector>
 
 #include "../shared/datagram.h"
 
@@ -37,7 +38,10 @@ private:
 	socklen_t clilen;
 	struct sockaddr_in serv_addr, cli_addr;
 
-	int lastReceivedPackageId;
+	std::vector<std::pair<int, sockaddr_in>>  lastReceivedPackageIdOfClient;
+	void setLastPackageReceivedOfClient(int lastPackageReveived, sockaddr_in client);
+	int getLastPackageReceivedOfClient(sockaddr_in client);
+
 	int lastSentPackageId = 0;
 
 	bool new_package = false;

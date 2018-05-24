@@ -54,7 +54,7 @@ void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr)
 
 				if(possibleAck.type == datagram_type::ack) {
 
-				std::cout << "ESPERANDO ACK " << lastSentPackageId << ", RECEBIDO => " << possibleAck.ack_last_package_id_received << "\n";
+					// std::cout << "ESPERANDO ACK " << lastSentPackageId << ", RECEBIDO => " << possibleAck.ack_last_package_id_received << "\n";
 
 					if(possibleAck.ack_last_package_id_received == lastSentPackageId) {
 
@@ -74,27 +74,27 @@ bool ServerConnectorUDP::has_new_package()
 
 		if(package.type == datagram_type::control) {
 
-			if(package.control.package_id != lastReceivedPackageId) {
+			if(package.control.package_id != getLastPackageReceivedOfClient(cli_addr)) {
 		
 				new_package = true;
-				lastReceivedPackageId = package.control.package_id;
+				setLastPackageReceivedOfClient(package.control.package_id, cli_addr);
 			}
 		}
 
 		if(package.type == datagram_type::data) {
 
-			if(package.data.package_id != lastReceivedPackageId) {
+			if(package.data.package_id != getLastPackageReceivedOfClient(cli_addr)) {
 				
 				new_package = true;
-				lastReceivedPackageId = package.data.package_id;
+				setLastPackageReceivedOfClient(package.data.package_id, cli_addr);
 			}
 		}
 
 		// Send ack  
 		datagram ack;  
 		ack.type = datagram_type::ack;
-		ack.ack_last_package_id_received = lastReceivedPackageId;
-		std::cout << "MANDANDO ACK " << lastReceivedPackageId << "\n";
+		ack.ack_last_package_id_received = getLastPackageReceivedOfClient(cli_addr);
+		// std::cout << "MANDANDO ACK " <<  getLastPackageReceivedOfClient(cli_addr) << "\n";
 		sendto(sockfd, &ack, DATAGRAM_SIZE, 0,(struct sockaddr *) &cli_addr, sizeof(struct sockaddr));
 	}
 
@@ -117,4 +117,45 @@ std::pair<datagram, sockaddr_in> ServerConnectorUDP::receive_next_package_and_ad
 void ServerConnectorUDP::close()
 {
 
+}
+
+bool isEqual(sockaddr_in anAddr, sockaddr_in fraeAddress) {
+
+	return (anAddr.sin_addr.s_addr == fraeAddress.sin_addr.s_addr) && (anAddr.sin_port == fraeAddress.sin_port);
+}
+
+void ServerConnectorUDP::setLastPackageReceivedOfClient(int lastPackageReveived, sockaddr_in client) {
+
+	bool found = false;
+	for(int i=0; i<lastReceivedPackageIdOfClient.size(); i++) {
+
+		std::pair<int, sockaddr_in> lastReceivedPackageId = lastReceivedPackageIdOfClient.at(i);
+
+		if(isEqual(lastReceivedPackageId.second, client)) {
+
+			found = true;
+			lastReceivedPackageIdOfClient.at(i) = std::make_pair(lastPackageReveived, client);
+		}
+	}
+
+	if(!found) {
+		
+		std::cout << "NEW INSTANCE OF DROPBOXCLIENT CONNECTED!\n";
+		lastReceivedPackageIdOfClient.push_back(std::make_pair(lastPackageReveived, client));
+	}
+}
+
+int ServerConnectorUDP::getLastPackageReceivedOfClient(sockaddr_in client) {
+
+	for(std::pair<int, sockaddr_in> lastReceivedPackageId : lastReceivedPackageIdOfClient) {
+
+		if(isEqual(lastReceivedPackageId.second, client)) {
+
+			return lastReceivedPackageId.first;
+		}
+	}
+
+	setLastPackageReceivedOfClient(0, client);
+
+	return getLastPackageReceivedOfClient(client);
 }
