@@ -5,11 +5,13 @@ int main(int argc, char **argv)
 	printf("Initializing server...\n");
 	int port;
 	std::string dir;
+	std::string serverIpOfOneOfTheGroups = "NOPE";
+	int serverPort = -1;
 
 	if(argc < 5) 
 	{
 		printf("How to use:\n");
-		printf("dropboxServer -p <port> -d <working dir>\n");
+		printf("dropboxServer -p <port> -d <working dir> -s <ip of another server> <port of that server>\n");
 		exit(1);
 	}
     for(int i = 1; i < argc; i++) 
@@ -32,7 +34,14 @@ int main(int argc, char **argv)
 					i++;
 					dir = argv[i];
 				break;
-						  
+
+				case 's':
+					i++;
+					serverIpOfOneOfTheGroups = argv[i];
+					i++;
+					serverPort = atoi(argv[i]);
+				break;
+
 				default:
 					printf("Invalid parameter %d: %s\n", i, argv[i]);
 					exit(1);
@@ -43,6 +52,13 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 	}
+	
+	if(serverIpOfOneOfTheGroups == "NOPE" || serverPort == -1) {
+		
+		Server(port, dir).run();
 
-	Server(port, dir).run();
+	} else {
+
+		Server(port, dir, serverIpOfOneOfTheGroups, serverPort).run();
+	}
 }

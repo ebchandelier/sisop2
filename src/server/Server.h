@@ -7,6 +7,8 @@
 #include "../shared/DeviceFilesInfo.h"
 #include "ClientHandler.h"
 #include "ThreadSafeQueue.h"
+#include "DistributedServer.h"
+#include<iostream>
 
 #define MAXIMUM_PACKAGES_QUEUE_SIZE 100
 
@@ -17,6 +19,7 @@ class Server
 {
 public:
     Server(int port, std::string base_path);
+    Server(int port, std::string base_path, std::string ip, int portToConnect);
     void run();
 
 private:
@@ -34,5 +37,8 @@ private:
     std::map<user_t, DeviceFilesInfo> device_files;
 	std::map<client_id_t, ThreadSafeQueue<datagram>*> incoming_queues;
 	ThreadSafeQueue<std::pair<sockaddr_in, datagram>> outgoing_packages;
+
+    std::vector<std::pair<std::string, int>> ipPortConnectedList;
+    std::vector<std::pair<std::string, int>> shouldWarn;
 
 };
