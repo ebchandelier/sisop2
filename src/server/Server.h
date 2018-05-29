@@ -38,7 +38,7 @@ private:
 	std::map<client_id_t, ThreadSafeQueue<datagram>*> incoming_queues;
 	ThreadSafeQueue<std::pair<sockaddr_in, datagram>> outgoing_packages;
 
-    std::vector<std::pair<std::string, int>> ipPortConnectedList;
-    std::vector<std::pair<std::string, int>> shouldWarn;
+    std::vector<PROCESS_PATH> ipPortConnectedList;
+    std::vector<PROCESS_PATH> shouldWarn;
 
 };

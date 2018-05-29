@@ -1,6 +1,8 @@
 #include<iostream>
 #include<vector>
 
+#include<mutex>
+
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -13,27 +15,38 @@
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h> 
+#include <fcntl.h>
 
 #include<thread>
+
+#include "./../shared/datagram.h"
 
 class DistributedServer
 {
 public:
 
-    DistributedServer(int port, std::vector<std::pair<std::string, int>> *ipPortConnectedList, std::vector<std::pair<std::string, int>> *shouldWarn);
+    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<PROCESS_PATH> *shouldWarn);
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);
-    void addCommunication(std::string ip, int port);
-    void warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort);
-    void communicate(int socket);
+    int addCommunication(std::string ip, int port, int pid);
+    void warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort, int pid);
+    void communicate(int socket, int indexAdded);
+    bool contains(int pid);
 
 private:
 
     int port;
-    std::vector<std::pair<std::string, int>> serversConnected;
-    std::vector<std::pair<std::string, int>> *ipPortConnectListPointer;
-    std::vector<std::pair<std::string, int>> *shouldWarn;
+    int basePort;
+    std::vector<PROCESS_PATH> *ipPortConnectListPointer;
+    std::vector<PROCESS_PATH> *shouldWarn;
+
+    std::mutex mutex_constructor;
+    std::mutex mutex_connect;
+    std::mutex mutex_warn;
+    std::mutex mutex_send;
+    std::mutex mutex_add_communication;
+    std::mutex mutex_add_thread;
 
 };
 

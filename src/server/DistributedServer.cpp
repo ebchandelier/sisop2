@@ -2,59 +2,178 @@
 
 #define BUFFERSIZE 1024
 
-typedef struct {
-    char ip[15];
-    int port;
-} IP_PORT;
+DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<PROCESS_PATH> *shouldWarn) {
 
-DistributedServer::DistributedServer(int port, std::vector<std::pair<std::string, int>> *ipPortConnectedList, std::vector<std::pair<std::string, int>> *shouldWarn) {
+    std::unique_lock<std::mutex> mlock(mutex_constructor);
 
-    this->port = port;
+    std::cout << "Starting thread for process of pid:" << getpid() << "\n";
+    std::cout << "THREAD WITH PORT: " << port << " AND CONNECTED SIZE: " << ipPortConnectedList->size() << "\n";
+
+    this->basePort = port;
+
+    this->port = port + ipPortConnectedList->size();
     
     this->ipPortConnectListPointer = ipPortConnectedList;
 
     this->shouldWarn = shouldWarn;
 }
 
-void DistributedServer::warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort) {
+PROCESS_PATH getNullPath() {
 
-    for(int i=1; i <= this->ipPortConnectListPointer->size(); i++) {
+    PROCESS_PATH pp;
+    pp.pid = -1;
 
-        this->shouldWarn->push_back(std::make_pair(ip, basePort + i));
+    return pp;
+}
+
+bool isNullPath(PROCESS_PATH pp) {
+
+    if(pp.pid == -1) return true;
+
+    return false;
+}
+
+PROCESS_PATH buildProcessPath(std::string ip, int port, int pid) {
+
+    PROCESS_PATH pp;
+
+    memcpy(pp.ip, (ip+"            ").c_str(), 15);
+    pp.port = port;
+    pp.pid = pid;
+
+    return pp;
+}
+
+void DistributedServer::warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort, int pid) {
+
+    std::unique_lock<std::mutex> mlock(mutex_warn);
+
+    for(int i=0; i < this->ipPortConnectListPointer->size(); i++) {
+
+        this->shouldWarn->at(i) = getNullPath();
+    }
+
+    for(int i=0; i < this->ipPortConnectListPointer->size()-1; i++) {
+
+        this->shouldWarn->at(i) = buildProcessPath(ip, basePort + i + 1, pid);
+    }
+
+    std::cout << "\nPrinting vector should Warn:\n";
+    for(auto warn : *this->shouldWarn) {
+
+        if(!isNullPath(warn)) {
+
+            std::cout << warn.ip << " " << warn.port << " " << warn.pid << "\n";
+        }
     }
 }
-void DistributedServer::communicate(int socket) {
 
+bool DistributedServer::contains(int pid) {
 
-    std::cout << "starting communication\n";
+    for(auto process : *this->ipPortConnectListPointer) {
+
+        if(process.pid == pid) return true;
+    }
+
+    return false;
+}
+
+void DistributedServer::communicate(int socket, int indexAdded) {
+
+    std::cout << "starting communication on socket " << socket << " at index " << indexAdded << "\n";
 
     while(true) {
 
-        if(this->shouldWarn->size() > 0) {
+        // usleep(1000000);
 
-            std::pair<std::string, int> ipPort = this->shouldWarn->at(0);
-            this->shouldWarn->erase(this->shouldWarn->begin(), this->shouldWarn->begin());
+        // std::cout << socket << " " << indexAdded << "\n";
 
-            //sendo ip, port, to connect
+        if(!isNullPath(this->shouldWarn->at(indexAdded))) {
+        
+            PROCESS_PATH ipPort = this->shouldWarn->at(indexAdded);
+            this->shouldWarn->at(indexAdded) = getNullPath();
+
+            // std::cout << "Read at shouldWarn: " << ipPort.ip << " " << ipPort.port << " " << ipPort.pid << "\n";
+
+            TYPE type;
+            type.type = control_type::action_add_ip_port;
+            type.ip_port = ipPort;
+
+            std::cout << "MANDANDO MSG PRA INDEX: " << indexAdded << ", ip:" << type.ip_port.ip << " port:" << type.ip_port.port << "\n";
+            write(socket, &type, sizeof(type));
         }
 
-        // std::string received = receive(socket);
-        //do what?
-        //send_string // lógica do guloso
+        TYPE type_response;
+        memset(&type_response, -1, sizeof(TYPE));
+        read(socket, &type_response, sizeof(TYPE));
+
+        if(type_response.type == control_type::action_add_ip_port) {
+
+            std::cout << "OKAY RECEBEU MSG PARA ADICIONAR, " << type_response.ip_port.ip << " " << type_response.ip_port.port << " " << type_response.ip_port.pid << "\n";
+
+            if(!this->contains(type_response.ip_port.pid)) {
+
+                std::unique_lock<std::mutex> mlock(mutex_add_thread);
+                
+                std::cout << "Vai entrar no connectWith\n";
+
+                int basePort = this->basePort;
+                std::vector<PROCESS_PATH> *pointerConnected = this->ipPortConnectListPointer;
+                std::vector<PROCESS_PATH> *pointerShouldConnected = this->shouldWarn;
+
+                int currentSize = this->ipPortConnectListPointer->size();
+
+                std::thread([&, basePort, pointerConnected, pointerShouldConnected, type_response]() {
+		            DistributedServer(basePort, pointerConnected, pointerShouldConnected).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+                }).detach();
+                
+                while(currentSize == this->ipPortConnectListPointer->size());
+
+                std::cout << "connected...\n";
+            } 
+        
+        } else if(type_response.type == control_type::ip_port_added) {
+
+            std::cout << "RECEIVED OKAY, ADDED.\n";
+        } 
     }
 }
 
-void DistributedServer::addCommunication(std::string ip, int port) {
+std::string cleanUpIp(std::string ip) {
 
-    std::pair<std::string, int> pair = std::make_pair(ip, port);
-    
-    this->ipPortConnectListPointer->push_back(pair);
+    std::string result = "";
+
+    for(int i=0; i<ip.size(); i++) {
+
+        if(ip[i] != ' ') {
+
+            result += ip[i];
+        }
+    }
+
+    return result;
+}
+
+int DistributedServer::addCommunication(std::string ip, int port, int pid) {
+
+    std::unique_lock<std::mutex> mlock(mutex_add_communication);
+
+    ip = cleanUpIp(ip);
+
+    std::cout << "Adding communication with: " << ip << " " << port << " " << pid << "\n";
+
+    PROCESS_PATH processPath = buildProcessPath(ip, port, pid);
+
+    this->ipPortConnectListPointer->push_back(processPath);
+    this->shouldWarn->push_back(getNullPath());
 
     std::cout << "\n\nAdded comunication, now talking with:\n";
-    for(auto pair : *this->ipPortConnectListPointer) {
+    for(auto processPath : *this->ipPortConnectListPointer) {
 
-        std::cout << "ip: " << pair.first << ", port: " << pair.second << "\n";
+        std::cout << "ip: " << processPath.ip << ", port: " << processPath.port << " pid:" << processPath.pid << "\n";
     }
+
+    return this->ipPortConnectListPointer->size()-1; //index in which it was added 
 }
 
 void DistributedServer::waitNewConnection() {
@@ -83,66 +202,80 @@ void DistributedServer::waitNewConnection() {
 	if ((newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) == -1) 
 		printf("ERROR on accept");
 
+
     std::cout << "Accepted connection\n";
 	
-    IP_PORT ip_port;
-    char buffer[sizeof(ip_port)];
-    read(newsockfd, buffer, sizeof(ip_port));
-    memcpy(&ip_port, buffer, sizeof(ip_port));
+    PROCESS_PATH anotherProcessPath;
+    read(newsockfd, &anotherProcessPath, sizeof(PROCESS_PATH));
 
-    int port = this->port;
-    std::vector<std::pair<std::string, int>> *ipPortConnectListPointer = this->ipPortConnectListPointer;
-    std::vector<std::pair<std::string, int>> *shouldWarnPointer = this->shouldWarn;
+    PROCESS_PATH thisProcessPath = buildProcessPath("YOU KNOW", 666, getpid()); // send just the pid
+    write(newsockfd, &thisProcessPath, sizeof(PROCESS_PATH));
 
-    std::thread([&, port, ipPortConnectListPointer]() {
-        DistributedServer(port+1, ipPortConnectListPointer, shouldWarnPointer).waitNewConnection();
+    fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
+    fcntl(newsockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
+    
+    int basePort = this->basePort;
+    std::vector<PROCESS_PATH> *ipPortConnectListPointer = this->ipPortConnectListPointer;
+    std::vector<PROCESS_PATH> *shouldWarnPointer = this->shouldWarn;
+
+    std::thread([&, basePort, ipPortConnectListPointer]() {
+        DistributedServer(basePort, ipPortConnectListPointer, shouldWarnPointer).waitNewConnection();
     }).detach();
 
+    int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
 
-    this->warnEveryProcessAboutMyConnectedProcess(std::string(ip_port.ip), ip_port.port);
+    this->warnEveryProcessAboutMyConnectedProcess(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
 
-    this->addCommunication(std::string(ip_port.ip), ip_port.port);
-
-    communicate(newsockfd);
+    this->communicate(newsockfd, indexAdded);
 }
 
 void DistributedServer::connectWith(std::string ip, int port) {
 
-    std::cout << "Connecting With " << ip << " " << port << "\n";
+    while(true) { // Keep trying till it get on communicate loop
 
-    int sockfd, n;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-	
-	server = gethostbyname(ip.c_str());
-	if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host\n");
-        exit(0);
+        ip = cleanUpIp(ip);
+
+        std::cout << "Connecting With " << ip << " " << port << "\n";
+
+        int sockfd, n;
+        struct sockaddr_in serv_addr;
+        struct hostent *server;
+        
+        server = gethostbyname(ip.c_str());
+        if (server == NULL) {
+            fprintf(stderr,"ERROR, no such host\n");
+            continue;
+        }
+        
+        if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+
+            printf("ERROR opening socket\n");
+            continue;
+        }
+        
+        serv_addr.sin_family = AF_INET;     
+        serv_addr.sin_port = htons(port);    
+        serv_addr.sin_addr = *((struct in_addr *)server->h_addr);
+        bzero(&(serv_addr.sin_zero), 8);     
+        
+        if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
+
+            printf("ERROR connecting\n");
+            continue;
+        }
+
+        std::cout << "Connected with " << ip << " " << port << "\n";
+        
+        PROCESS_PATH thisProcessPath = buildProcessPath(ip, this->port, getpid()); // provavel treta no ip....
+        write(sockfd, &thisProcessPath, sizeof(PROCESS_PATH));
+
+        PROCESS_PATH anotherProcessPath;
+        read(sockfd, &anotherProcessPath, sizeof(PROCESS_PATH));
+
+        fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
+
+        int indexAdded = this->addCommunication(ip, port, anotherProcessPath.pid);
+
+        this->communicate(sockfd, indexAdded);
     }
-    
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
-        printf("ERROR opening socket\n");
-    
-	serv_addr.sin_family = AF_INET;     
-	serv_addr.sin_port = htons(port);    
-	serv_addr.sin_addr = *((struct in_addr *)server->h_addr);
-	bzero(&(serv_addr.sin_zero), 8);     
-    
-	if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
-        printf("ERROR connecting\n");
-
-    std::cout << "Connected with " << ip << " " << port << "\n";
-
-    IP_PORT ip_port;
-    memcpy(ip_port.ip, (ip+"     ").c_str(), 15);//corrigir o ip
-    ip_port.port = this->port;
-
-
-    char buffer[sizeof(ip_port)];
-    memccpy(buffer, (void*)&ip_port, 1,  sizeof(ip_port));
-    write(sockfd, buffer, sizeof(ip_port));
-
-    this->addCommunication(ip, port);
-
-    communicate(sockfd);
 }

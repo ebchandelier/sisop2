@@ -136,4 +136,25 @@ typedef struct
 } datagram;
 
 
+//DEFS FOR MULTISERVER
+typedef struct {
+    char ip[15];
+    int port;
+    int pid;
+} PROCESS_PATH;
+
+enum class control_type
+{
+    action_add_ip_port,
+    ip_port_added
+};
+
+typedef struct {
+    control_type type;
+    union {
+        PROCESS_PATH ip_port;
+    };
+} TYPE;
+
+
 #define DATAGRAM_SIZE sizeof(datagram)
