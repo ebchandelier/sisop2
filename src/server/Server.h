@@ -40,5 +40,6 @@ private:
 
     std::vector<PROCESS_PATH> ipPortConnectedList;
     std::vector<PROCESS_PATH> shouldWarn;
+    int threadCount = 0;
 
 };

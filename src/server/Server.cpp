@@ -6,7 +6,7 @@ Server::Server(int port, std::string base_path) : outgoing_packages(MAXIMUM_PACK
 	this->work_path = base_path + "/sync_dir";
 
 	std::thread([&, port]() {
-		DistributedServer(port, &ipPortConnectedList, &shouldWarn).waitNewConnection();
+		DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount).waitNewConnection();
     }).detach();
 }
 
@@ -18,13 +18,13 @@ Server::Server(int port, std::string base_path, std::string ip, int portToConnec
 	int currentSizeConnected = this->ipPortConnectedList.size();
 
 	std::thread([&, port, ip, portToConnect]() {
-		DistributedServer(port, &ipPortConnectedList, &shouldWarn).connectWith(ip, portToConnect);
+		DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount).connectWith(ip, portToConnect);
     }).detach();
 
 	while(this->ipPortConnectedList.size()==currentSizeConnected);
 
 	std::thread([&, port]() {
-		DistributedServer(port, &ipPortConnectedList, &shouldWarn).waitNewConnection();
+		DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount).waitNewConnection();
     }).detach();
 }
 

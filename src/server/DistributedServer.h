@@ -25,7 +25,7 @@ class DistributedServer
 {
 public:
 
-    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<PROCESS_PATH> *shouldWarn);
+    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<PROCESS_PATH> *shouldWarn, int *threadCount);
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);
@@ -40,6 +40,7 @@ private:
     int basePort;
     std::vector<PROCESS_PATH> *ipPortConnectListPointer;
     std::vector<PROCESS_PATH> *shouldWarn;
+    int *threadCounter;
 
     std::mutex mutex_constructor;
     std::mutex mutex_connect;
