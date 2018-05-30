@@ -6,9 +6,6 @@ DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPort
 
     std::unique_lock<std::mutex> mlock(mutex_constructor);
 
-    // std::cout << "Starting thread for process of pid:" << getpid() << "\n";
-    // std::cout << "THREAD WITH PORT: " << port << " AND CONNECTED SIZE: " << ipPortConnectedList->size() << "\n";
-
     this->basePort = port;
 
     this->threadCounter = threadCount;
@@ -61,15 +58,6 @@ void DistributedServer::warnEveryProcessAboutMyConnectedProcess(std::string ip, 
 
         this->shouldWarn->at(i) = buildProcessPath(ip, basePort + i + 1, pid);
     }
-
-    // std::cout << "\nPrinting vector should Warn:\n";
-    // for(auto warn : *this->shouldWarn) {
-
-    //     if(!isNullPath(warn)) {
-
-    //         std::cout << warn.ip << " " << warn.port << " " << warn.pid << "\n";
-    //     }
-    // }
 }
 
 bool DistributedServer::contains(int pid) {
@@ -97,8 +85,6 @@ void DistributedServer::communicate(int socket, int indexAdded) {
             PROCESS_PATH ipPort = this->shouldWarn->at(indexAdded);
             this->shouldWarn->at(indexAdded) = getNullPath();
 
-            // std::cout << "Read at shouldWarn: " << ipPort.ip << " " << ipPort.port << " " << ipPort.pid << "\n";
-
             TYPE type;
             type.type = control_type::action_add_ip_port;
             type.ip_port = ipPort;
@@ -119,23 +105,13 @@ void DistributedServer::communicate(int socket, int indexAdded) {
 
                 std::unique_lock<std::mutex> mlock(mutex_add_thread);
                 
-                // std::cout << "Vai entrar no connectWith\n";
-
-                int basePort = this->basePort;
-                std::vector<PROCESS_PATH> *pointerConnected = this->ipPortConnectListPointer;
-                std::vector<PROCESS_PATH> *pointerShouldConnected = this->shouldWarn;
-
                 int currentSize = this->ipPortConnectListPointer->size();
 
-                int *threadCounterPointer = this->threadCounter;
-
-                std::thread([&, basePort, pointerConnected, pointerShouldConnected, type_response, threadCounterPointer]() {
-		            DistributedServer(basePort, pointerConnected, pointerShouldConnected, threadCounterPointer).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+                std::thread([&, type_response]() {
+		            DistributedServer(basePort, ipPortConnectListPointer, shouldWarn, threadCounter).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
                 }).detach();
                 
                 while(currentSize == this->ipPortConnectListPointer->size());
-
-                // std::cout << "connected...\n";
             } 
         
         } else if(type_response.type == control_type::ip_port_added) {
@@ -165,8 +141,6 @@ int DistributedServer::addCommunication(std::string ip, int port, int pid) {
     std::unique_lock<std::mutex> mlock(mutex_add_communication);
 
     ip = cleanUpIp(ip);
-
-    // std::cout << "Adding communication with: " << ip << " " << port << " " << pid << "\n";
 
     PROCESS_PATH processPath = buildProcessPath(ip, port, pid);
 
@@ -209,8 +183,6 @@ void DistributedServer::waitNewConnection() {
 		printf("ERROR on accept");
 
 
-    // std::cout << "Accepted connection\n";
-	
     PROCESS_PATH anotherProcessPath;
     read(newsockfd, &anotherProcessPath, sizeof(PROCESS_PATH));
 
@@ -220,14 +192,8 @@ void DistributedServer::waitNewConnection() {
     fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     fcntl(newsockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     
-    int basePort = this->basePort;
-    std::vector<PROCESS_PATH> *ipPortConnectListPointer = this->ipPortConnectListPointer;
-    std::vector<PROCESS_PATH> *shouldWarnPointer = this->shouldWarn;
-
-    int *threadCounterPointer = this->threadCounter;
-
-    std::thread([&, basePort, ipPortConnectListPointer, threadCounterPointer]() {
-        DistributedServer(basePort, ipPortConnectListPointer, shouldWarnPointer, threadCounterPointer).waitNewConnection();
+    std::thread([&]() {
+        DistributedServer(basePort, ipPortConnectListPointer, shouldWarn, threadCounter).waitNewConnection();
     }).detach();
 
     int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
@@ -241,9 +207,11 @@ void DistributedServer::connectWith(std::string ip, int port) {
 
     while(true) { // Keep trying till it get on communicate loop
 
-        ip = cleanUpIp(ip);
+        std::cout << "Trying to connect with " << ip << " " << port << "\n";
 
-        // std::cout << "Connecting With " << ip << " " << port << "\n";
+        usleep(200000); // trying not to kill my leptop
+
+        ip = cleanUpIp(ip);
 
         int sockfd, n;
         struct sockaddr_in serv_addr;
@@ -268,7 +236,7 @@ void DistributedServer::connectWith(std::string ip, int port) {
         
         if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
 
-            // printf("ERROR connecting\n");
+            printf("ERROR connecting\n");
             continue;
         }
 
