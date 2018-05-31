@@ -48,6 +48,7 @@ private:
     std::mutex mutex_send;
     std::mutex mutex_add_communication;
     std::mutex mutex_add_thread;
+    std::mutex mutex_communicate;
 
 };
 

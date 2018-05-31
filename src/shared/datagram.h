@@ -146,7 +146,10 @@ typedef struct {
 enum class control_type
 {
     action_add_ip_port,
-    ip_port_added
+    ip_port_added,
+    election,
+    answer,
+    coordinator
 };
 
 typedef struct {

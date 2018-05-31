@@ -76,7 +76,18 @@ void DistributedServer::communicate(int socket, int indexAdded) {
 
     while(true) {
 
+        std::unique_lock<std::mutex> mlock(mutex_communicate);
+
         usleep(1000000);
+
+        TYPE type_forTestingConnection;
+        memset(&type_forTestingConnection, -1, sizeof(TYPE));
+        std::cout << "mandando para " << socket << " " << indexAdded << "\n";
+        if (write(socket, &type_forTestingConnection, sizeof(TYPE)) == -1) {
+
+            std::cout << "It stop Working....\n";
+            return;
+        }
 
         // std::cout << socket << " " << indexAdded << "\n";
 
@@ -201,11 +212,13 @@ void DistributedServer::waitNewConnection() {
     this->warnEveryProcessAboutMyConnectedProcess(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
 
     this->communicate(newsockfd, indexAdded);
+
+    std::cout << "Terminate thread that started with waitNewConnection\n";
 }
 
 void DistributedServer::connectWith(std::string ip, int port) {
 
-    while(true) { // Keep trying till it get on communicate loop
+    while(true) { // Keep trying till it connects
 
         std::cout << "Trying to connect with " << ip << " " << port << "\n";
 
@@ -253,5 +266,10 @@ void DistributedServer::connectWith(std::string ip, int port) {
         int indexAdded = this->addCommunication(ip, port, anotherProcessPath.pid);
 
         this->communicate(sockfd, indexAdded);
+
+        std::cout << "Terminate thread that started with connectWith\n";
+
+        return; // If this->communicate loop stops, we should finished this thread
     }
+
 }
