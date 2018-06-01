@@ -86,6 +86,10 @@ void DistributedServer::communicate(int socket, int indexAdded) {
         if (write(socket, &type_forTestingConnection, sizeof(TYPE)) == -1) {
 
             std::cout << "It stop Working....\n";
+            
+            // TODO
+            //Tell the other threads to start a new election.... using shouldWarn ?
+
             return;
         }
 
@@ -167,6 +171,14 @@ int DistributedServer::addCommunication(std::string ip, int port, int pid) {
     return this->ipPortConnectListPointer->size()-1; //index in which it was added 
 }
 
+void pauseThread() { // master gambi
+
+    while(true) {
+
+        usleep(1000000);
+    }
+}
+
 void DistributedServer::waitNewConnection() {
 
     int sockfd, newsockfd, n;
@@ -214,6 +226,8 @@ void DistributedServer::waitNewConnection() {
     this->communicate(newsockfd, indexAdded);
 
     std::cout << "Terminate thread that started with waitNewConnection\n";
+
+    pauseThread();
 }
 
 void DistributedServer::connectWith(std::string ip, int port) {
@@ -269,7 +283,7 @@ void DistributedServer::connectWith(std::string ip, int port) {
 
         std::cout << "Terminate thread that started with connectWith\n";
 
-        return; // If this->communicate loop stops, we should finished this thread
+        pauseThread();
     }
 
 }
