@@ -25,7 +25,7 @@ class DistributedServer
 {
 public:
 
-    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<PROCESS_PATH> *shouldWarn, int *threadCount);
+    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected);
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);
@@ -33,14 +33,18 @@ public:
     void warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort, int pid);
     void communicate(int socket, int indexAdded);
     bool contains(int pid);
+    void startElection();
+    bool writeWithError(int socket, TYPE *type);
+
 
 private:
 
     int port;
     int basePort;
     std::vector<PROCESS_PATH> *ipPortConnectListPointer;
-    std::vector<PROCESS_PATH> *shouldWarn;
+    std::vector<TYPE> *communicationVector;
     int *threadCounter;
+    int *elected;
 
     std::mutex mutex_constructor;
     std::mutex mutex_connect;

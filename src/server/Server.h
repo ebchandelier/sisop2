@@ -39,7 +39,7 @@ private:
 	ThreadSafeQueue<std::pair<sockaddr_in, datagram>> outgoing_packages;
 
     std::vector<PROCESS_PATH> ipPortConnectedList;
-    std::vector<PROCESS_PATH> shouldWarn;
+    std::vector<TYPE> shouldWarn;
     int threadCount = 0;
     int elected = -1; // -1 is the initial value for not entered the election
 

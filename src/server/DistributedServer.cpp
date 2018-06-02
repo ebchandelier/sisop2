@@ -2,7 +2,7 @@
 
 #define BUFFERSIZE 1024
 
-DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<PROCESS_PATH> *shouldWarn, int *threadCount) {
+DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected) {
 
     std::unique_lock<std::mutex> mlock(mutex_constructor);
 
@@ -16,7 +16,9 @@ DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPort
     
     this->ipPortConnectListPointer = ipPortConnectedList;
 
-    this->shouldWarn = shouldWarn;
+    this->communicationVector = communicationVector;
+
+    this->elected = elected;
 }
 
 PROCESS_PATH getNullPath() {
@@ -45,18 +47,50 @@ PROCESS_PATH buildProcessPath(std::string ip, int port, int pid) {
     return pp;
 }
 
+TYPE buildCommandType(control_type type_to_set) {
+
+    TYPE type;
+    type.type = type_to_set;
+
+    return type;
+}
+
+void pauseThread() { // master gambi
+
+    while(true) {
+
+        usleep(1000000);
+    }
+}
+
+TYPE getNullCommandType() {
+
+    TYPE type;
+    type.type = control_type::nothing;
+
+    return type;
+}
+
+bool isNullCommandTYPE(TYPE type) {
+
+    return type.type == control_type::nothing;
+}
+
 void DistributedServer::warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort, int pid) {
 
     std::unique_lock<std::mutex> mlock(mutex_warn);
 
     for(int i=0; i < this->ipPortConnectListPointer->size(); i++) {
 
-        this->shouldWarn->at(i) = getNullPath();
+        this->communicationVector->at(i) = getNullCommandType();
     }
 
     for(int i=0; i < this->ipPortConnectListPointer->size()-1; i++) {
 
-        this->shouldWarn->at(i) = buildProcessPath(ip, basePort + i + 1, pid);
+        TYPE type = buildCommandType(control_type::action_add_ip_port);
+        type.ip_port = buildProcessPath(ip, basePort + i + 1, pid);
+
+        this->communicationVector->at(i) = type;
     }
 }
 
@@ -70,9 +104,35 @@ bool DistributedServer::contains(int pid) {
     return false;
 }
 
+void DistributedServer::startElection() {
+
+    for(int i=0; i<this->communicationVector->size(); i++) {
+
+        this->communicationVector->at(i) = buildCommandType(control_type::start_election);
+    }
+}
+
+bool DistributedServer::writeWithError(int socket, TYPE *type) {
+
+    int error_code;
+    int error_code_size = sizeof(error_code);
+    getsockopt(socket, SOL_SOCKET, SO_ERROR, &error_code, (socklen_t*)&error_code_size);
+
+    if(error_code == 0) {
+
+        write(socket, type, sizeof(*type));
+
+        return true;
+    }
+
+    return false;
+}
+
 void DistributedServer::communicate(int socket, int indexAdded) {
 
-    // std::cout << "starting communication on socket " << socket << " at index " << indexAdded << "\n";
+    bool fightingForElection = false;
+
+    int testConnectionWhenItIsZero = 3;
 
     while(true) {
 
@@ -80,41 +140,61 @@ void DistributedServer::communicate(int socket, int indexAdded) {
 
         usleep(1000000);
 
-        TYPE type_forTestingConnection;
-        memset(&type_forTestingConnection, -1, sizeof(TYPE));
-        std::cout << "mandando para " << socket << " " << indexAdded << "\n";
-        if (write(socket, &type_forTestingConnection, sizeof(TYPE)) == -1) {
+        TYPE type_forTestingConnection = buildCommandType(control_type::nothing);
+        
+        if(!this->writeWithError(socket, &type_forTestingConnection)) {
 
-            std::cout << "It stop Working....\n";
-            
-            // TODO
-            //Tell the other threads to start a new election.... using shouldWarn ?
+            this->startElection();
 
             return;
         }
 
-        // std::cout << socket << " " << indexAdded << "\n";
+        if(!isNullCommandTYPE(this->communicationVector->at(indexAdded))) {
+            
+            TYPE type = this->communicationVector->at(indexAdded);
+            this->communicationVector->at(indexAdded) = getNullCommandType();
 
-        if(!isNullPath(this->shouldWarn->at(indexAdded))) {
-        
-            PROCESS_PATH ipPort = this->shouldWarn->at(indexAdded);
-            this->shouldWarn->at(indexAdded) = getNullPath();
+            if(type.type == control_type::action_add_ip_port) {
 
-            TYPE type;
-            type.type = control_type::action_add_ip_port;
-            type.ip_port = ipPort;
+                if(!this->writeWithError(socket, &type)) {
 
-            // std::cout << "MANDANDO MSG PRA INDEX: " << indexAdded << ", ip:" << type.ip_port.ip << " port:" << type.ip_port.port << "\n";
-            write(socket, &type, sizeof(type));
+                    this->startElection();
+
+                    return;
+                }
+
+            } else if(type.type == control_type::start_election) {
+
+                // Sendo election to all the process with the pid greater than mine
+
+                std::cout << "OKAY LETS SEND MSG TO START AN ALECTION\n";
+                
+                fightingForElection = true;
+
+                if(getpid() > this->ipPortConnectListPointer->at(indexAdded).pid) {
+
+                    TYPE newType = buildCommandType(control_type::election);
+                    
+                    this->writeWithError(socket, &newType);
+
+                    if(!this->writeWithError(socket, &newType)) {
+
+                        this->startElection();
+
+                        return;
+                    }
+                }
+
+                // start timeout
+            }
         }
 
-        TYPE type_response;
-        memset(&type_response, -1, sizeof(TYPE));
+        // if timeout, and fightingForElection == true, send coordinator
+        
+        TYPE type_response = getNullCommandType();
         read(socket, &type_response, sizeof(TYPE));
-
+        
         if(type_response.type == control_type::action_add_ip_port) {
-
-            // std::cout << "OKAY RECEBEU MSG PARA ADICIONAR, " << type_response.ip_port.ip << " " << type_response.ip_port.port << " " << type_response.ip_port.pid << "\n";
 
             if(!this->contains(type_response.ip_port.pid)) {
 
@@ -123,15 +203,35 @@ void DistributedServer::communicate(int socket, int indexAdded) {
                 int currentSize = this->ipPortConnectListPointer->size();
 
                 std::thread([&, type_response]() {
-		            DistributedServer(basePort, ipPortConnectListPointer, shouldWarn, threadCounter).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+		            DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
                 }).detach();
                 
                 while(currentSize == this->ipPortConnectListPointer->size());
             } 
         
-        } else if(type_response.type == control_type::ip_port_added) {
+        } else if(type_response.type == control_type::election) {
 
-            // std::cout << "RECEIVED OKAY, ADDED.\n";
+            std::cout << "OK RECEIVED ELECTION MSG, sending answer\n";
+
+            TYPE answer = buildCommandType(control_type::answer);
+            this->writeWithError(socket, &answer); 
+
+            if(!this->writeWithError(socket, &answer)) {
+
+                this->startElection();
+
+                return;
+            }
+
+        } else if(type_response.type == control_type::answer) {
+
+            std::cout << "RECEIVED ANSWER\n";
+
+            fightingForElection = false;
+
+        } else if(type_response.type == control_type::coordinator) {
+
+            *this->elected = this->ipPortConnectListPointer->at(indexAdded).pid;
         } 
     }
 }
@@ -160,7 +260,7 @@ int DistributedServer::addCommunication(std::string ip, int port, int pid) {
     PROCESS_PATH processPath = buildProcessPath(ip, port, pid);
 
     this->ipPortConnectListPointer->push_back(processPath);
-    this->shouldWarn->push_back(getNullPath());
+    this->communicationVector->push_back(getNullCommandType());
 
     std::cout << "\n\nAdded comunication, now talking with:\n";
     for(auto processPath : *this->ipPortConnectListPointer) {
@@ -169,14 +269,6 @@ int DistributedServer::addCommunication(std::string ip, int port, int pid) {
     }
 
     return this->ipPortConnectListPointer->size()-1; //index in which it was added 
-}
-
-void pauseThread() { // master gambi
-
-    while(true) {
-
-        usleep(1000000);
-    }
 }
 
 void DistributedServer::waitNewConnection() {
@@ -216,7 +308,7 @@ void DistributedServer::waitNewConnection() {
     fcntl(newsockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     
     std::thread([&]() {
-        DistributedServer(basePort, ipPortConnectListPointer, shouldWarn, threadCounter).waitNewConnection();
+        DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected).waitNewConnection();
     }).detach();
 
     int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
@@ -267,8 +359,6 @@ void DistributedServer::connectWith(std::string ip, int port) {
             continue;
         }
 
-        // std::cout << "Connected with " << ip << " " << port << "\n";
-        
         PROCESS_PATH thisProcessPath = buildProcessPath(ip, this->port, getpid()); // provavel treta no ip....
         write(sockfd, &thisProcessPath, sizeof(PROCESS_PATH));
 
