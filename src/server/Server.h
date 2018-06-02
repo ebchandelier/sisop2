@@ -42,5 +42,5 @@ private:
     std::vector<TYPE> shouldWarn;
     int threadCount = 0;
     int elected = -1; // -1 is the initial value for not entered the election
-
+    bool fightingForElection = false;
 };

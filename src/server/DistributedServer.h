@@ -25,7 +25,7 @@ class DistributedServer
 {
 public:
 
-    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected);
+    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection);
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);
@@ -35,6 +35,7 @@ public:
     bool contains(int pid);
     void startElection();
     bool writeWithError(int socket, TYPE *type);
+    void setElected(int elected);
 
 
 private:
@@ -45,6 +46,7 @@ private:
     std::vector<TYPE> *communicationVector;
     int *threadCounter;
     int *elected;
+    bool *fightingForElection;
 
     std::mutex mutex_constructor;
     std::mutex mutex_connect;
@@ -53,6 +55,6 @@ private:
     std::mutex mutex_add_communication;
     std::mutex mutex_add_thread;
     std::mutex mutex_communicate;
-
+    std::mutex mutex_startElection;
 };
 

@@ -2,7 +2,7 @@
 
 #define BUFFERSIZE 1024
 
-DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected) {
+DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection) {
 
     std::unique_lock<std::mutex> mlock(mutex_constructor);
 
@@ -19,6 +19,8 @@ DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPort
     this->communicationVector = communicationVector;
 
     this->elected = elected;
+
+    this->fightingForElection = fightingForElection;
 }
 
 PROCESS_PATH getNullPath() {
@@ -59,7 +61,7 @@ void pauseThread() { // master gambi
 
     while(true) {
 
-        usleep(1000000);
+        usleep(100000000);
     }
 }
 
@@ -74,6 +76,17 @@ TYPE getNullCommandType() {
 bool isNullCommandTYPE(TYPE type) {
 
     return type.type == control_type::nothing;
+}
+
+void DistributedServer::setElected(int elected) {
+
+    if(elected != *this->elected) {
+
+        // TODO
+        // Warn server that the elected was changed
+        *this->elected = elected;
+        std::cout << "Process " << getpid() << " electing process of pid: " << *this->elected << " to be the lider\n"; 
+    }
 }
 
 void DistributedServer::warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort, int pid) {
@@ -106,6 +119,8 @@ bool DistributedServer::contains(int pid) {
 
 void DistributedServer::startElection() {
 
+    std::unique_lock<std::mutex> mlock(mutex_startElection);
+
     for(int i=0; i<this->communicationVector->size(); i++) {
 
         this->communicationVector->at(i) = buildCommandType(control_type::start_election);
@@ -130,15 +145,18 @@ bool DistributedServer::writeWithError(int socket, TYPE *type) {
 
 void DistributedServer::communicate(int socket, int indexAdded) {
 
-    bool fightingForElection = false;
+    int timeout = 0;
 
-    int testConnectionWhenItIsZero = 3;
+    usleep(100000); // why do we need this?
+
+    // When some process enters, it restarts the election, even when the lider is ok (bully)
+    this->startElection();
 
     while(true) {
 
         std::unique_lock<std::mutex> mlock(mutex_communicate);
 
-        usleep(1000000);
+        usleep(100000);
 
         TYPE type_forTestingConnection = buildCommandType(control_type::nothing);
         
@@ -169,27 +187,33 @@ void DistributedServer::communicate(int socket, int indexAdded) {
 
                 std::cout << "OKAY LETS SEND MSG TO START AN ALECTION\n";
                 
-                fightingForElection = true;
+                *this->fightingForElection = true;
 
-                if(getpid() > this->ipPortConnectListPointer->at(indexAdded).pid) {
+                if(getpid() < this->ipPortConnectListPointer->at(indexAdded).pid) {
 
                     TYPE newType = buildCommandType(control_type::election);
                     
-                    this->writeWithError(socket, &newType);
-
                     if(!this->writeWithError(socket, &newType)) {
 
                         this->startElection();
 
                         return;
                     }
+                    
                 }
-
-                // start timeout
+                
+                timeout = 100; // it should be something like 2 * (time to trans) +  1 * (time to process)
             }
         }
 
-        // if timeout, and fightingForElection == true, send coordinator
+        if(timeout--== 0 && *this->fightingForElection) {
+
+            TYPE coordinator = buildCommandType(control_type::coordinator);
+            this->writeWithError(socket, &coordinator);
+
+            std::cout << "timeout....\n";
+            this->setElected(getpid());
+        }
         
         TYPE type_response = getNullCommandType();
         read(socket, &type_response, sizeof(TYPE));
@@ -203,15 +227,13 @@ void DistributedServer::communicate(int socket, int indexAdded) {
                 int currentSize = this->ipPortConnectListPointer->size();
 
                 std::thread([&, type_response]() {
-		            DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+		            DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
                 }).detach();
                 
                 while(currentSize == this->ipPortConnectListPointer->size());
             } 
         
         } else if(type_response.type == control_type::election) {
-
-            std::cout << "OK RECEIVED ELECTION MSG, sending answer\n";
 
             TYPE answer = buildCommandType(control_type::answer);
             this->writeWithError(socket, &answer); 
@@ -225,13 +247,13 @@ void DistributedServer::communicate(int socket, int indexAdded) {
 
         } else if(type_response.type == control_type::answer) {
 
-            std::cout << "RECEIVED ANSWER\n";
+            // std::cout << "RECEIVED ANSWER\n";
 
-            fightingForElection = false;
+            *this->fightingForElection = false;
 
         } else if(type_response.type == control_type::coordinator) {
 
-            *this->elected = this->ipPortConnectListPointer->at(indexAdded).pid;
+            this->setElected(this->ipPortConnectListPointer->at(indexAdded).pid);
         } 
     }
 }
@@ -308,7 +330,7 @@ void DistributedServer::waitNewConnection() {
     fcntl(newsockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     
     std::thread([&]() {
-        DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected).waitNewConnection();
+        DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).waitNewConnection();
     }).detach();
 
     int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
