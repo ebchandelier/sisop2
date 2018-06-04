@@ -36,60 +36,42 @@ int	ClientConnectionManager::login_server(char* username, char* host, int port)
 void ClientConnectionManager::sync_client()
 {
     std::unique_lock<std::mutex> mlock(mutex);
-    // Send sync request
-    datagram sync_request;
-    sync_request.type = datagram_type::control;
-    sync_request.control.action = control_actions::request_sync_dir;
-    connector.send_package(sync_request);
-
-    auto response = connector.receive_package();
-    if (response.type == datagram_type::control &&
-        response.control.action == control_actions::accept_sync_dir)
-    {
-        auto files_count = response.control.sync_dir_response.files_count;
-        for (int i = 0; i < files_count; i++)
-        {
-            // Get upload request
-            auto upload_request = connector.receive_package();
-            std::string file_name = upload_request.control.file.filename;
-            // Accept upload request
-            datagram accept_upload;
-            accept_upload.type = datagram_type::control;
-            accept_upload.control.action = control_actions::accept_upload;
-            connector.send_package(accept_upload);
-            // Get file
-            while (true)
-            {
-                std::vector<datagram> packages;
-                auto package = connector.receive_package();
-                packages.push_back(package);
-                if (package.data.is_last)
-                {
-                    PersistenceFileManager().write(work_dir + "/" + file_name, packages);
-                    break;
-                }
-            }
-        }
-    }
+    auto server_files = internal_sendListFilesRequest();
+    resolve_diff(device_files, server_files);
 }
 void ClientConnectionManager::send_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
-    auto packages = PersistenceFileManager().read(file);
+    internal_send_file(file);
+}
 
+void ClientConnectionManager::internal_send_file(char* file_name)
+{
+    printf("sending file %s\n", file_name);
     // Extract filename from path
-    std::string file_name(file);
-    auto last_slash = file_name.find_last_of("/");
-    if (last_slash != std::string::npos)
+    std::string path = std::string(work_dir) + "/" + std::string(file_name);
+    
+    // Read file
+    auto packages = PersistenceFileManager().read(path);
+
+    // Setup file_info
+    file_info file__info;
+    file__info.name = file_name;
+    if (!device_files.has(file_name)) 
     {
-        file_name = file_name.substr(last_slash + 1);
+        file__info.version = 1;
+    }
+    else
+    {
+        file__info.version = device_files.get(file_name).version;
     }
 
     // Send upload request
     datagram request;
     request.type = datagram_type::control;
     request.control.action = control_actions::request_upload;
-    strcpy(request.control.file.filename, file_name.c_str());
+    request.control.upload_request_data.version = file__info.version;
+    strcpy(request.control.upload_request_data.filename, file_name);
     connector.send_package(request);
 
     auto response = connector.receive_package();
@@ -99,15 +81,12 @@ void ClientConnectionManager::send_file(char* file)
     {
         std::cout << DatagramStringifier().stringify(package);
         connector.send_package(package);
-        //auto response = connector.receive_package();
-        // TODO: Send ack
     }
+    device_files.set(file__info);
 }
 
-std::list<file_info> ClientConnectionManager::sendListFilesRequest()
+DeviceFilesInfo ClientConnectionManager::internal_sendListFilesRequest()
 {
-    std::unique_lock<std::mutex> mlock(mutex);
-
     // Send upload request
     datagram request;
     request.type = datagram_type::control;
@@ -118,36 +97,61 @@ std::list<file_info> ClientConnectionManager::sendListFilesRequest()
     return FileInfoVectorSerializer().deserialize(response.control.list_files_response.data);
 }
 
+DeviceFilesInfo ClientConnectionManager::sendListFilesRequest()
+{
+    std::unique_lock<std::mutex> mlock(mutex);
+    return internal_sendListFilesRequest();
+}
+
 void ClientConnectionManager::get_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
+    internal_get_file(file);
+}
 
+void ClientConnectionManager::internal_get_file(char* file_name)
+{
+    printf("getting file %s\n", file_name);
     // Send download request
     datagram request;
     request.type = datagram_type::control;
     request.control.action = control_actions::request_download;
-    strcpy(request.control.file.filename, file);
+    strcpy(request.control.download_request_data.filename, file_name);
     connector.send_package(request);
 
-    //auto response = connector.receive_package();
-    // TODO: Check response
-
-    std::vector<datagram> packages;
-    while(true)
+    // Check response
+    auto response = connector.receive_package();
+    if (response.type == datagram_type::control)
     {
-        auto package = connector.receive_package();
-        packages.push_back(package);
-        if (package.data.is_last)
+        // If ok
+        if (response.control.action == control_actions::accept_download)
         {
-            break;
+            // Get file
+            std::vector<datagram> packages;
+            while(true)
+            {
+                auto package = connector.receive_package();
+                packages.push_back(package);
+                if (package.data.is_last)
+                {
+                    break;
+                }
+            }
+
+            // Save
+            PersistenceFileManager().write(work_dir + "/" + std::string(file_name), packages);
+            file_info file;
+            file.name = response.control.download_accept_data.filename;
+            file.version = response.control.download_accept_data.version;
+            device_files.set(file);
+        }
+        else if (response.control.action == control_actions::deny_download)
+        {
+            printf("Error on downloading file %s: %s\n", file_name, response.control.download_deny_data.message);
         }
     }
-
-    // TODO: If we write the file to the synced dir, the Daemon will pick up it
-    // and try to upload the file we just downloaded
-    PersistenceFileManager().write("./" + std::string(file), packages);
-
 }
+
 void ClientConnectionManager::delete_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
@@ -164,7 +168,7 @@ void ClientConnectionManager::delete_file(char* file)
     datagram request;
     request.type = datagram_type::control;
     request.control.action = control_actions::request_exclude;
-    strcpy(request.control.file.filename, file_name.c_str());
+    strcpy(request.control.exclude_request_data.filename, file_name.c_str());
     connector.send_package(request);
 
     // Get response
@@ -195,3 +199,42 @@ int ClientConnectionManager::logout()
     return -1;
 }
 
+void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server)
+{
+    auto files_union = DeviceFilesInfo::common_files(client, server);
+    for (const auto file : files_union)
+    {
+        auto has_client = client.has(file);
+        auto has_server = server.has(file);
+
+        if (has_client && !has_server)
+        {
+            internal_send_file((char *)file.c_str());
+        }
+        if (!has_client && has_server)
+        {
+            internal_get_file((char *)file.c_str());
+        }
+        if (has_client && has_server)
+        {
+            auto client_file = client.get(file);
+            auto server_file = server.get(file);
+            if (client_file.version > server_file.version)
+            {
+                printf("calling internal_send_file with %s\n", file.c_str());
+                internal_send_file((char *)file.c_str());
+            }
+            if (client_file.version < server_file.version)
+            {
+                internal_get_file((char *)file.c_str());
+                // Decrement version, so when we write it back, 
+                // the inotify thread will increase the version again
+                auto info = device_files.get(file);
+                info.version--;
+                device_files.set(info);
+            }
+            // Otherwise, the version is the same and nothing needs to be done
+        }
+    }
+
+}

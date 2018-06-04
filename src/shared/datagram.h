@@ -3,11 +3,13 @@
 #define DATA_BUFFER_SIZE 1400
 #define MAXIMUM_USERNAME 10
 #define MAXIMUM_FILE_NAME 100
+#define MAXIMUM_ERROR_MESSAGE 100
 
 enum class datagram_type
 {
     control,
-    data
+    data,
+    ack
 };
 
 enum class control_actions
@@ -34,14 +36,11 @@ enum class control_actions
 
     request_logout,
     accept_logout,
+    deny_logout,
 
     request_list_files,
     accept_list_files,
-
-    request_sync_dir,
-    accept_sync_dir,
-
-    ack
+    deny_list_files,
 };
 
 enum class user_type
@@ -65,6 +64,12 @@ typedef struct
     char filename[MAXIMUM_FILE_NAME];
 } control_file_info;
 
+typedef struct
+{
+    char filename[MAXIMUM_FILE_NAME];
+    char version;
+} control_file_with_version_info;
+
 typedef struct 
 {
     char data[DATA_BUFFER_SIZE];
@@ -77,12 +82,33 @@ typedef struct
 
 typedef struct
 {
+    char message[MAXIMUM_ERROR_MESSAGE];
+} error_message;
+
+typedef struct
+{
     control_actions action;
+    uint32_t package_id;
     union {
+        // Login
         control_login_data login_response_data;
         control_login_request_data login_request_data;
-        control_file_info file;
+
+        // Upload
+        control_file_with_version_info upload_request_data;
+
+        // Download
+        control_file_info download_request_data;
+        control_file_with_version_info download_accept_data;
+        error_message download_deny_data;
+
+        // Exclude
+        control_file_info exclude_request_data;
+
+        // List
         control_list_files_response_data list_files_response;
+
+        // Sync dir
         control_sync_dir_response_data sync_dir_response;
     };
 
@@ -105,8 +131,35 @@ typedef struct
     union {
         data_datagram data;
         control_datagram control;
+        uint32_t ack_last_package_id_received;
     };
 } datagram;
+
+
+//DEFS FOR MULTISERVER
+typedef struct {
+    char ip[15];
+    int port;
+    int pid;
+} PROCESS_PATH;
+
+enum class control_type
+{
+    nothing,
+    action_add_ip_port,
+    ip_port_added,
+    start_election,
+    election,
+    answer,
+    coordinator
+};
+
+typedef struct {
+    control_type type;
+    union {
+        PROCESS_PATH ip_port;
+    };
+} TYPE;
 
 
 #define DATAGRAM_SIZE sizeof(datagram)

@@ -2,12 +2,12 @@
 #include <list>
 #include <string>
 #include <cstring>
-#include "./fileInfo.h"
+#include "DeviceFilesInfo.h"
 
 class FileInfoVectorSerializer
 {
 public:
-    void serialize(char* out, std::list<file_info> files);
+    void serialize(char* out, DeviceFilesInfo files);
 
-    std::list<file_info> deserialize(char* buffer);
+    DeviceFilesInfo deserialize(char* buffer);
 };

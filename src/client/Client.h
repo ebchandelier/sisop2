@@ -3,6 +3,7 @@
 #include "ClientConnectionManager.h"
 #include "CheckFileChangesDaemonThread.h"
 #include "ClientFilesSynchronizer.h"
+#include "../shared/DeviceFilesInfo.h"
 #include "../shared/ListFiles.h"
 // #include "CheckFileChangesDaemonThread.cpp"
 #include <string>
@@ -15,6 +16,9 @@
 class Client
 {
 public:
+
+    Client(): manager(device_files) { };
+
     int main(int argc, char **argv);
 
 private:
@@ -62,5 +66,7 @@ private:
 
     int command;
     int running;
+
+    DeviceFilesInfo device_files;
 
 };
