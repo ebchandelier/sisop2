@@ -21,12 +21,13 @@ int Client::main(int argc, char **argv)
 
   login_server((char *)username.c_str(), endereco, atoi(porta));
 
-  running = 1;
+  running = 2;
   while(running)
   {
-    if (running == 1)
+    if (running == 2)
     {
       command = ui.cmdline(UI_START);
+      running = 1;
     } else
       command = ui.cmdline(UI_DEFAULT);
     command_solver(command);
