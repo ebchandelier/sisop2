@@ -36,16 +36,29 @@ int	ClientConnectionManager::login_server(char* username, char* host, int port)
 void ClientConnectionManager::sync_client()
 {
     std::unique_lock<std::mutex> mlock(mutex);
+    // Try to send modified files since the last sync
+    for (auto file : queue)
+    {
+        internal_send_file(file.c_str());
+    }
+    queue.clear();
+    // And sync the state
     auto server_files = internal_sendListFilesRequest();
     resolve_diff(device_files, server_files);
 }
+
+void ClientConnectionManager::enqueue_file_update(char* file)
+{
+    queue.push_back(file);
+}
+
 void ClientConnectionManager::send_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
     internal_send_file(file);
 }
 
-void ClientConnectionManager::internal_send_file(char* file_name)
+void ClientConnectionManager::internal_send_file(const char* file_name)
 {
     printf("sending file %s\n", file_name);
     // Extract filename from path
@@ -75,14 +88,15 @@ void ClientConnectionManager::internal_send_file(char* file_name)
     connector.send_package(request);
 
     auto response = connector.receive_package();
-    // TODO: Check response
-
-    for (auto package : packages)
+    if (response.type == datagram_type::control && response.control.action == control_actions::accept_upload)
     {
-        std::cout << DatagramStringifier().stringify(package);
-        connector.send_package(package);
+        for (auto package : packages)
+        {
+            std::cout << DatagramStringifier().stringify(package);
+            connector.send_package(package);
+        }
+        device_files.set(file__info);
     }
-    device_files.set(file__info);
 }
 
 DeviceFilesInfo ClientConnectionManager::internal_sendListFilesRequest()
@@ -204,6 +218,15 @@ int ClientConnectionManager::logout()
     return -1;
 }
 
+void ClientConnectionManager::internal_delete_device_file(char* file)
+{
+    std::string path = work_dir + std::string("/") + std::string(file);
+    int success = remove(path.c_str());
+    if (success != 0) {
+        printf("Failed to delete file\n");
+    }
+}
+
 void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server)
 {
     auto files_union = DeviceFilesInfo::common_files(client, server);
@@ -214,11 +237,11 @@ void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesIn
 
         if (has_client && !has_server)
         {
-            internal_send_file((char *)file.c_str());
+            internal_delete_device_file((char *)file.c_str());
         }
         if (!has_client && has_server)
         {
-            internal_delete_file((char *)file.c_str());
+            internal_get_file((char *)file.c_str());
         }
         if (has_client && has_server)
         {

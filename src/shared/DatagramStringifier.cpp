@@ -72,11 +72,17 @@ std::string DatagramStringifier::stringify(datagram package)
             case control_actions::accept_list_files:
                 out += "accept_list_files";
                 break;
+            case control_actions::deny_list_files:
+                out += "deny_list_files";
+                break;
             case control_actions::request_exclude:
                 out += "request_exclude";
                 break;
             case control_actions::accept_exclude:
                 out += "accept_exclude";
+                break;
+            case control_actions::deny_exclude:
+                out += "deny_exclude";
                 break;
             default:
                 out += "corrupted (" + std::to_string((int)action) + ")";

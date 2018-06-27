@@ -24,6 +24,8 @@ public:
 
     void run(std::string path, DeviceFilesInfo& files_info);
 
+    ClientConnectionManager* manager;
+
 private:
 
     void checkFileChange(std::string path, DeviceFilesInfo& files_info);

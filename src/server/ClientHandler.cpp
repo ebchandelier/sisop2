@@ -41,17 +41,29 @@ void ClientHandler::run()
 				// Read file info
 				upload_fileinfo.name = package.control.upload_request_data.filename;
 				upload_fileinfo.version = package.control.upload_request_data.version;
-				printf("Receiving file %s version %d\n", upload_fileinfo.name.c_str(), upload_fileinfo.version);
+				printf("Receiving filresponsee %s version %d\n", upload_fileinfo.name.c_str(), upload_fileinfo.version);
 
-				// Prepare state
-				buffer.clear();
-				state = ClientHandlerState::receiving_file;
+				// Only accept if version is file is new or version is higher
+				if (device_files.has(upload_fileinfo.name) && (device_files.get(upload_fileinfo.name).version >= upload_fileinfo.version))
+				{
+					// Deny
+					datagram response;
+					response.type = datagram_type::control;
+					response.control.action = control_actions::deny_upload;
+					outgoing_packages->produce(response);
+				}
+				else
+				{
+					// Prepare state
+					buffer.clear();
+					state = ClientHandlerState::receiving_file;
 
-				// Accept upload
-				datagram response;
-				response.type = datagram_type::control;
-				response.control.action = control_actions::accept_upload;
-				outgoing_packages->produce(response);
+					// Accept upload
+					datagram response;
+					response.type = datagram_type::control;
+					response.control.action = control_actions::accept_upload;
+					outgoing_packages->produce(response);
+				}
 			}
 			if (package.control.action == control_actions::request_download)
 			{
@@ -87,11 +99,10 @@ void ClientHandler::run()
 			}
 			if (package.control.action == control_actions::request_list_files)
 			{
-  				auto files = ListFiles::listFilesAt(this->user_path);				
 				datagram response;
 				response.type = datagram_type::control;
 				response.control.action = control_actions::accept_list_files;
-				FileInfoVectorSerializer().serialize(response.control.list_files_response.data, files);
+				FileInfoVectorSerializer().serialize(response.control.list_files_response.data, device_files);
 				outgoing_packages->produce(response);
 			}
 			if (package.control.action == control_actions::request_exclude)
@@ -102,13 +113,22 @@ void ClientHandler::run()
 				if (success != 0)
 				{
 					printf("Failed to delete file\n");
-					// TODO: handle
+					datagram response;
+					response.type = datagram_type::control;
+					response.control.action = control_actions::deny_exclude;
+					outgoing_packages->produce(response);
 				}
-				// Accept
-				datagram response;
-				response.type = datagram_type::control;
-				response.control.action = control_actions::accept_exclude;
-				outgoing_packages->produce(response);
+				else
+				{
+					// Remove from device files
+					device_files.remove(package.control.exclude_request_data.filename);
+				
+					// Send response
+					datagram response;
+					response.type = datagram_type::control;
+					response.control.action = control_actions::accept_exclude;
+					outgoing_packages->produce(response);
+				}
 			}
 			/*
 			if (package.control.action == control_actions::request_sync_dir)

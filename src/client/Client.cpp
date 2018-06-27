@@ -63,7 +63,9 @@ int Client::login_server(char* username, char* host, int port)
     
     // Start folder watcher daemon
     std::thread([&, path](){
-      CheckFileChangesDaemonThread().run(path, device_files);
+      auto daemon = CheckFileChangesDaemonThread();
+      daemon.manager = &manager;
+      daemon.run(path, device_files);
     }).detach();
     
     return LOGIN_TRUE;

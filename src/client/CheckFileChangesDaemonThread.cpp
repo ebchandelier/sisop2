@@ -48,7 +48,8 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFiles
                 if (event->mask & IN_CLOSE_WRITE) 
                 {
                     // O arquivo pode ter sido criado ou editado
-                    printf("%s changed\n");
+                    printf("%s changed\n", event->name);
+                    manager->enqueue_file_update(event->name);
                     if (files_info.has(event->name))
                     {
                         auto file = files_info.get(event->name);
@@ -66,11 +67,14 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFiles
                 if (event->mask & IN_MOVED_FROM)
                 {
                     // O arquivo foi 'deletado', removido da pasta para a lixeira
-                    printf("%s was removed\n");
+                    printf("%s was removed\n", event->name);
+                    manager->delete_file(event->name);
+                    /*
                     if (files_info.has(event->name))
                     {
                         files_info.remove(event->name);
                     }
+                    */
                 }
                i += EVENT_SIZE + event->len;
             }

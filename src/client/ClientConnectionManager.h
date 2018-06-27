@@ -2,6 +2,8 @@
 #include <cstring>
 #include <mutex>
 #include <list>
+#include <string>
+#include <vector>
 #include "ClientConnectorUDP.h"
 #include "../shared/datagram.h"
 #include "../shared/PersistenceFileManager.cpp"
@@ -24,6 +26,8 @@ public:
     int logout();
     DeviceFilesInfo sendListFilesRequest();
 
+    void enqueue_file_update(char* file);
+
     std::string work_dir;
 
 private:
@@ -31,15 +35,18 @@ private:
 
     // Internal functions do not acquire the lock, so they can be called from other functions
     // inside the class
-    void internal_send_file(char* file);
+    void internal_send_file(const char* file);
     void internal_get_file(char* file);
     void internal_delete_file(char* file);
+    void internal_delete_device_file(char* file);
     DeviceFilesInfo internal_sendListFilesRequest();
 
     void resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server);
 
     // TODO: Pass by reference
     DeviceFilesInfo& device_files;
+
+    std::vector<std::string> queue;
 
     // This class behaves like a monitor, only allowing one method to be executing at a time
     std::mutex mutex;
