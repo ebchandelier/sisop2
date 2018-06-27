@@ -155,7 +155,11 @@ void ClientConnectionManager::internal_get_file(char* file_name)
 void ClientConnectionManager::delete_file(char* file)
 {
     std::unique_lock<std::mutex> mlock(mutex);
+    internal_delete_file(file);
+}
 
+void ClientConnectionManager::internal_delete_file(char* file)
+{
     // Extract filename from path
     std::string file_name(file);
     auto last_slash = file_name.find_last_of("/");
@@ -174,6 +178,7 @@ void ClientConnectionManager::delete_file(char* file)
     // Get response
     connector.receive_package();
 }
+
 int ClientConnectionManager::logout()
 {
     std::unique_lock<std::mutex> mlock(mutex);
@@ -213,7 +218,7 @@ void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesIn
         }
         if (!has_client && has_server)
         {
-            internal_get_file((char *)file.c_str());
+            internal_delete_file((char *)file.c_str());
         }
         if (has_client && has_server)
         {

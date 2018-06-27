@@ -5,6 +5,30 @@ void CheckFileChangesDaemonThread::run(std::string path, DeviceFilesInfo& files_
     checkFileChange(path, files_info);
 }
 
+void CheckFileChangesDaemonThread::print_debug(struct inotify_event* event)
+{
+    printf("%s: ", event->name);
+    if (event->mask & IN_CREATE) {
+        printf("IN_CREATE, ");
+    }
+    if (event->mask & IN_CLOSE_WRITE) {
+        printf("IN_CLOSE_WRITE");
+    }
+    if (event->mask & IN_MOVED_FROM) {
+        printf("MOVED_FROM, ");
+    }
+    if (event->mask & IN_MOVED_TO) {
+        printf("MOVED_TO, ");
+    }
+    if (event->mask & IN_DELETE) {
+        printf("IN_DELETED, ");
+    }
+    if (event->mask & IN_MODIFY) {
+        printf("IN_MODIFY, ");
+    }
+    printf("\n");
+}
+
 void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFilesInfo& files_info)
 {
     char buffer[BUF_LEN];
@@ -20,61 +44,35 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFiles
             struct inotify_event *event = (struct inotify_event *) &buffer[i];
             if (event->len)
             {
-                if (event->mask & IN_CREATE)
+                print_debug(event);
+                if (event->mask & IN_CLOSE_WRITE) 
                 {
-                    if (event->mask & IN_ISDIR) 
+                    // O arquivo pode ter sido criado ou editado
+                    printf("%s changed\n");
+                    if (files_info.has(event->name))
                     {
-                        //std::cout << "The directory " << event->name << " was Created\n";
-                    } 
+                        auto file = files_info.get(event->name);
+                        file.version++;
+                        files_info.set(file); 
+                    }
                     else
                     {
-                        std::cout << "The file " << event->name << " was Created\n";
                         file_info file;
                         file.name = event->name;
                         file.version = 1;
                         files_info.set(file);
                     }
                 }
-                if (event->mask & IN_CLOSE_WRITE)
+                if (event->mask & IN_MOVED_FROM)
                 {
-                    if (event->mask & IN_ISDIR)
+                    // O arquivo foi 'deletado', removido da pasta para a lixeira
+                    printf("%s was removed\n");
+                    if (files_info.has(event->name))
                     {
-                        //std::cout << "The directory " << event->name << " was modified\n";      
-                    }
-                    else
-                    {
-                        std::cout << "The file " << event->name << " was modified\n";
-                        if (files_info.has(event->name))
-                        {
-                            auto file = files_info.get(event->name);
-                            file.version++;
-                            files_info.set(file); 
-                        }
-                        else
-                        {
-                            file_info file;
-                            file.name = event->name;
-                            file.version = 1;
-                            files_info.set(file);
-                        }
-                        
+                        files_info.remove(event->name);
                     }
                 }
-                if (event->mask & IN_DELETE || event->mask & IN_MOVE)
-                {
-                    // event->mask == IN_MOVED_TO due to a gnome bug, see https://github.com/cooltronics/NFC_device/issues/2
-                    if (event->mask & IN_ISDIR)
-                    {
-                        //std::cout << "The directory " << event->name << " was deleted\n";      
-                    } 
-                    else 
-                    {
-                        // BAD TRIGGER
-                        //std::cout << "The file " << event->name << " was deleted\n";
-                        //files_info.remove(event->name);
-                    }
-                } 
-                i += EVENT_SIZE + event->len;
+               i += EVENT_SIZE + event->len;
             }
         }
     }

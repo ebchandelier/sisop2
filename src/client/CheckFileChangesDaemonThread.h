@@ -16,7 +16,7 @@
 #define EVENT_SIZE (sizeof(struct inotify_event)) 
 #define BUF_LEN (MAX_EVENTS*(EVENT_SIZE+MAXIMUM_FILE_NAME)) 
 
-#define FILTERS IN_CREATE|IN_DELETE|IN_CLOSE_WRITE|IN_MOVE
+#define FILTERS IN_CREATE|IN_DELETE|IN_CLOSE_WRITE|IN_MOVE|IN_MODIFY
 
 class CheckFileChangesDaemonThread
 {
@@ -29,5 +29,7 @@ private:
     void checkFileChange(std::string path, DeviceFilesInfo& files_info);
 
     static std::vector<std::string> add_inotify_watch_recursive(int fd, std::string folder);
+
+    void print_debug(struct inotify_event* event);
 
 };
