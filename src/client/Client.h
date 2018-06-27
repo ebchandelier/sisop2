@@ -8,6 +8,12 @@
 // #include "CheckFileChangesDaemonThread.cpp"
 #include <string>
 
+
+struct rm {
+	std::string ip;
+	int port;
+};
+
 #define MAXNAME		50
 
 #define LOGIN_TRUE	1
@@ -19,7 +25,7 @@ public:
 
     Client(): manager(device_files) { };
 
-    int main(int argc, char **argv);
+    int main(std::string user, std::string dir, std::vector<rm> servers);
 
 private:
     //Estabelece uma sessão entre o cliente com o servidor.

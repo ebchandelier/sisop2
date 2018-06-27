@@ -1,23 +1,17 @@
 #include "Client.h"
 
 
-int Client::main(int argc, char **argv)
+int Client::main(std::string user, std::string dir, std::vector<rm> servers)
 {
 
-  ui.welcome_client(argv[1]);
+  ui.welcome_client((char*) user.c_str());
 
-  if (argc!=5)
-  {
-    ui.error(ERR_NOFARGS, emptymsg, emptymsg, emptymsg);
-  }
-  else
-  {
-    set_username(argv[1]);
-    set_endereco(argv[2]);
-    set_porta(argv[3]);
-    set_pasta(argv[4]);
-    ui.success(SUCC_ARGS, username, endereco, porta);
-  }
+  set_username((char*) user.c_str());
+  set_endereco((char*)servers[0].ip.c_str());
+  set_porta((char *)std::to_string(servers[0].port).c_str());
+  set_pasta((char*) dir.c_str());
+  ui.success(SUCC_ARGS, username, endereco, porta);
+  
 
   login_server((char *)username.c_str(), endereco, atoi(porta));
 

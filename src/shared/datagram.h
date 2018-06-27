@@ -41,6 +41,9 @@ enum class control_actions
     request_list_files,
     accept_list_files,
     deny_list_files,
+
+    request_primary_server,
+    accept_primary_server
 };
 
 enum class user_type
