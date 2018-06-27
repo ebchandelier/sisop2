@@ -219,9 +219,9 @@ void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesIn
         {
             auto client_file = client.get(file);
             auto server_file = server.get(file);
+            printf("File %s is version %d on the client and version %d on the server\n", file.c_str(), client_file.version, server_file.version);
             if (client_file.version > server_file.version)
             {
-                printf("calling internal_send_file with %s\n", file.c_str());
                 internal_send_file((char *)file.c_str());
             }
             if (client_file.version < server_file.version)

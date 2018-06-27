@@ -69,8 +69,9 @@ void CheckFileChangesDaemonThread::checkFileChange(std::string path, DeviceFiles
                     } 
                     else 
                     {
+                        // BAD TRIGGER
                         //std::cout << "The file " << event->name << " was deleted\n";
-                        files_info.remove(event->name);
+                        //files_info.remove(event->name);
                     }
                 } 
                 i += EVENT_SIZE + event->len;

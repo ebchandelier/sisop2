@@ -8,7 +8,7 @@ void FileInfoVectorSerializer::serialize(char* out, DeviceFilesInfo device_files
         //auto n = sprintf(out, "%s\n%d\n", file.name.c_str(), file.version);
         //out += n + 1;
         strncpy(pt, file.name.c_str(), file.name.length());
-        pt += file.name.length() + 1;
+        pt += file.name.length();
         *pt = '\n';
         pt += 1;
         *pt = file.version;

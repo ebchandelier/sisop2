@@ -53,7 +53,7 @@ void ClientConnectorUDP::send_package(datagram package)
 			
 			if(possibleAck.type == datagram_type::ack) {
 			
-				std::cout << "ESPERANDO ACK " << lastSentPackageId << ", RECEBIDO => " << possibleAck.ack_last_package_id_received << "\n";
+				//std::cout << "ESPERANDO ACK " << lastSentPackageId << ", RECEBIDO => " << possibleAck.ack_last_package_id_received << "\n";
 
 				if(possibleAck.ack_last_package_id_received == lastSentPackageId) {
 
@@ -101,7 +101,7 @@ datagram ClientConnectorUDP::receive_package()
 			datagram ack;  
 			ack.type = datagram_type::ack;
 			ack.ack_last_package_id_received = lastReceivedPackageId;
-			std::cout << "MANDANDO ACK " << lastReceivedPackageId << "\n";
+			//std::cout << "MANDANDO ACK " << lastReceivedPackageId << "\n";
 			sendto(sockfd, &ack, DATAGRAM_SIZE, 0, (const struct sockaddr *) &from, sizeof(struct sockaddr_in));
 			
 			if(shouldSendNewPackage) {

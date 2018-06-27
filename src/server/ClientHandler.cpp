@@ -41,6 +41,7 @@ void ClientHandler::run()
 				// Read file info
 				upload_fileinfo.name = package.control.upload_request_data.filename;
 				upload_fileinfo.version = package.control.upload_request_data.version;
+				printf("Receiving file %s version %d\n", upload_fileinfo.name.c_str(), upload_fileinfo.version);
 
 				// Prepare state
 				buffer.clear();
