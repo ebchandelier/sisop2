@@ -21,12 +21,18 @@ class ClientHandler
 {
 public:
 
-    ClientHandler(std::string base_path, ThreadSafeQueue<datagram>* incoming_packages, OutgoingPackages* outgoing_packages);
+    ClientHandler(
+        std::string base_path, 
+        DeviceFilesInfo* device_files,
+        ThreadSafeQueue<datagram>* incoming_packages, 
+        OutgoingPackages* outgoing_packages);
     void run();
 
 private:
 
-    DeviceFilesInfo device_files;
+    void internal_handle();
+
+    DeviceFilesInfo* device_files;
 
     file_info upload_fileinfo;
 

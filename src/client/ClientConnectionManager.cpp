@@ -227,7 +227,7 @@ void ClientConnectionManager::internal_delete_device_file(char* file)
     }
 }
 
-void ClientConnectionManager::resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server)
+void ClientConnectionManager::resolve_diff(DeviceFilesInfo &client, DeviceFilesInfo &server)
 {
     auto files_union = DeviceFilesInfo::common_files(client, server);
     for (const auto file : files_union)

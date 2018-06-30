@@ -41,7 +41,7 @@ private:
     void internal_delete_device_file(char* file);
     DeviceFilesInfo internal_sendListFilesRequest();
 
-    void resolve_diff(DeviceFilesInfo client, DeviceFilesInfo server);
+    void resolve_diff(DeviceFilesInfo &client, DeviceFilesInfo &server);
 
     // TODO: Pass by reference
     DeviceFilesInfo& device_files;

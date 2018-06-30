@@ -66,10 +66,13 @@ void Server::process_incoming_message()
 		// If this is a package from a new client
 		if (handlers.count(client_id) == 0)
 		{
+			// Create a DeviceFilesInfo structure
+			DeviceFilesInfo* device_files = new DeviceFilesInfo();
+			devices_files[client_id] = device_files;
 			// Create a queue for future incoming messages
 			incoming_queues.emplace(client_id, new ThreadSafeQueue<datagram>(MAXIMUM_PACKAGES_QUEUE_SIZE));
 			// Create a ClientHandler
-			handlers.emplace(client_id, ClientHandler(this->work_path, incoming_queues.at(client_id), new OutgoingPackages(addr, &outgoing_packages)));
+			handlers.emplace(client_id, ClientHandler(this->work_path, device_files, incoming_queues.at(client_id), new OutgoingPackages(addr, &outgoing_packages)));
 			// And run the handler in a new thread
 			std::thread([&]() {
 				handlers.at(client_id).run();

@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <mutex>
 #include "./fileInfo.h"
 
 class DeviceFilesInfo
@@ -21,6 +22,8 @@ public:
     static std::vector<std::string> common_files(
         DeviceFilesInfo& f1, 
         DeviceFilesInfo& f2);
+
+    //std::mutex mutex;
 
 private:
 
