@@ -63,12 +63,22 @@ void Server::process_incoming_message()
 		auto addr = package_and_addr.second;
 		auto client_id = addr.sin_addr.s_addr;
 		printf("Received package from %d:\n%s\n", client_id, stringifier.stringify(package).c_str());
-		// If this is a package from a new client
+		// If this is a package from a new device
 		if (handlers.count(client_id) == 0)
 		{
-			// Create a DeviceFilesInfo structure
-			DeviceFilesInfo* device_files = new DeviceFilesInfo();
-			devices_files[client_id] = device_files;
+			std::string user = std::string(package.control.login_request_data.username);
+			DeviceFilesInfo* device_files;
+			if (users_files.count(user) == 0)
+			{
+				// This is the first device from this user
+				device_files = new DeviceFilesInfo();
+				users_files[user] = device_files;			
+			}
+			else
+			{
+				// Not the first device, fetch files info data
+				device_files = users_files.at(user);
+			}
 			// Create a queue for future incoming messages
 			incoming_queues.emplace(client_id, new ThreadSafeQueue<datagram>(MAXIMUM_PACKAGES_QUEUE_SIZE));
 			// Create a ClientHandler

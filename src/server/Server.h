@@ -33,7 +33,7 @@ private:
 
     DatagramStringifier stringifier;
     ServerConnectorUDP connector;
-    std::map<client_id_t, DeviceFilesInfo*> devices_files;
+    std::map<std::string, DeviceFilesInfo*> users_files;
     std::map<client_id_t, ClientHandler> handlers;
     //std::map<user_t, DeviceFilesInfo> device_files;
 	std::map<client_id_t, ThreadSafeQueue<datagram>*> incoming_queues;
