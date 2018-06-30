@@ -6,7 +6,9 @@ Server::Server(int port, std::string base_path) : outgoing_packages(MAXIMUM_PACK
 	this->work_path = base_path + "/sync_dir";
 
 	std::thread([&, port]() {
-		DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection).waitNewConnection();
+		auto distributed_server = DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection);
+		distributed_server.is_leader = &is_leader;
+		distributed_server.waitNewConnection();
     }).detach();
 }
 
@@ -63,6 +65,16 @@ void Server::process_incoming_message()
 		auto addr = package_and_addr.second;
 		auto client_id = addr.sin_addr.s_addr;
 		printf("Received package from %d:\n%s\n", client_id, stringifier.stringify(package).c_str());
+		
+		if (is_leader)
+		{
+			// Send message to every replica
+			for (auto& replica: ipPortConnectedList)
+			{
+				printf("TODO: Sending package to replica %s : %d\n", replica.ip, replica.port);
+			}
+		}
+		
 		// If this is a package from a new device
 		if (handlers.count(client_id) == 0)
 		{
@@ -91,6 +103,7 @@ void Server::process_incoming_message()
 		// Dispatch the package to the correct queue
 		incoming_queues.at(client_id)->produce(package);
 	}
+
 }
 void Server::process_outgoing_message()
 {
@@ -100,7 +113,10 @@ void Server::process_outgoing_message()
 		// Fetch it
 		auto outgoing_package_info = outgoing_packages.consume();
 		printf("Sending package to %d:\n%s\n", outgoing_package_info.first.sin_addr.s_addr, stringifier.stringify(outgoing_package_info.second).c_str());		
-		// And send
-		connector.send_package(outgoing_package_info.second, outgoing_package_info.first);
+		// And send responsel only if its the leader
+		if (is_leader)
+		{
+			connector.send_package(outgoing_package_info.second, outgoing_package_info.first);
+		}
 	}
 }

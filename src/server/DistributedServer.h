@@ -1,7 +1,7 @@
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 
-#include<mutex>
+#include <mutex>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -37,6 +37,7 @@ public:
     bool writeWithError(int socket, TYPE *type);
     void setElected(int elected);
 
+    bool *is_leader = nullptr;
 
 private:
 

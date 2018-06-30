@@ -35,7 +35,6 @@ private:
     ServerConnectorUDP connector;
     std::map<std::string, DeviceFilesInfo*> users_files;
     std::map<client_id_t, ClientHandler> handlers;
-    //std::map<user_t, DeviceFilesInfo> device_files;
 	std::map<client_id_t, ThreadSafeQueue<datagram>*> incoming_queues;
 	ThreadSafeQueue<std::pair<sockaddr_in, datagram>> outgoing_packages;
 
@@ -44,4 +43,5 @@ private:
     int threadCount = 0;
     int elected = -1; // -1 is the initial value for not entered the election
     bool fightingForElection = false;
+    bool is_leader = true;
 };
