@@ -18,6 +18,15 @@ std::string DatagramStringifier::stringify(datagram package)
     }
     out += "\"\n";
 
+    if (package.is_from_master)
+    {
+        out += "From master: No\n";
+    }
+    else
+    {
+        out += "From master: Yes\n";
+    }
+
     if (package.type == datagram_type::control)
     {
         out += "Action: \"";

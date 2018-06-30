@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <netinet/in.h>
 #define DATA_BUFFER_SIZE 1400
 #define MAXIMUM_USERNAME 10
 #define MAXIMUM_FILE_NAME 100
@@ -131,6 +132,10 @@ typedef struct
 typedef struct
 {
     datagram_type type;
+    bool is_from_master;
+    // If the master is fowarding the package to a replica,
+    // the original information about the sender must be preserved
+    sockaddr_in original_sender;
     union {
         data_datagram data;
         control_datagram control;

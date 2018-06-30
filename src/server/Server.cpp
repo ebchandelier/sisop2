@@ -6,9 +6,9 @@ Server::Server(int port, std::string base_path) : outgoing_packages(MAXIMUM_PACK
 	this->work_path = base_path + "/sync_dir";
 
 	std::thread([&, port]() {
-		auto distributed_server = DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection);
-		distributed_server.is_leader = &is_leader;
-		distributed_server.waitNewConnection();
+		DistributedServer* distributed_server = new DistributedServer(port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection);
+		distributed_server->is_leader = &is_leader;
+		distributed_server->waitNewConnection();
     }).detach();
 }
 
@@ -71,8 +71,16 @@ void Server::process_incoming_message()
 			// Send message to every replica
 			for (auto& replica: ipPortConnectedList)
 			{
+				datagram forwarded_package = package;
+				forwarded_package.is_from_master = true;
+				forwarded_package.original_sender = addr;
 				printf("TODO: Sending package to replica %s : %d\n", replica.ip, replica.port);
 			}
+		}
+		else
+		{
+			// Use the addr information from the original sender, not the master
+			addr = package.original_sender;
 		}
 		
 		// If this is a package from a new device
