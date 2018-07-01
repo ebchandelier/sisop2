@@ -44,5 +44,5 @@ private:
     int threadCount = 0;
     int elected = -1; // -1 is the initial value for not entered the election
     bool fightingForElection = false;
-    bool is_leader = true;
+    bool is_leader = false;
 };

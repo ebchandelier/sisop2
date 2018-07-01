@@ -84,7 +84,7 @@ void DistributedServer::setElected(int elected) {
     {
         *this->elected = elected;
         std::cout << "Process " << this_pid << " electing process of pid: " << *this->elected << " to be the lider\n"; 
-        if (is_leader != nullptr && this_pid == *this->elected)
+        if (is_leader != nullptr)
         {
             // Warn server that the elected was changed            
             *is_leader = (*this->elected == this_pid);
