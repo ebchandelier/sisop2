@@ -80,7 +80,7 @@ void Server::process_incoming_message()
 				// Build replica sockaddr_in
 				sockaddr_in replica_addr;
 				replica_addr.sin_family = AF_INET;
-				replica_addr.sin_port = replica.port - 1;
+				replica_addr.sin_port = htons(replica.port - 1);
 				replica_addr.sin_addr.s_addr = inet_addr(replica.ip);
 				// Send package
 				connector.send_package(forwarded_package, replica_addr);
