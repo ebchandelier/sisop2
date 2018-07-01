@@ -79,15 +79,15 @@ bool isNullCommandTYPE(TYPE type) {
 }
 
 void DistributedServer::setElected(int elected) {
-
+    auto this_pid = getpid();
     if(elected != *this->elected)
     {
         *this->elected = elected;
-        std::cout << "Process " << getpid() << " electing process of pid: " << *this->elected << " to be the lider\n"; 
-        if (is_leader != nullptr && getpid() == *this->elected)
+        std::cout << "Process " << this_pid << " electing process of pid: " << *this->elected << " to be the lider\n"; 
+        if (is_leader != nullptr && this_pid == *this->elected)
         {
             // Warn server that the elected was changed            
-            *is_leader = *this->elected;
+            *is_leader = (*this->elected == this_pid);
         }
     }
 }
