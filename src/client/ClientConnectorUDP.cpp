@@ -33,6 +33,7 @@ void ClientConnectorUDP::connect(std::string server_name, int port)
 
 void ClientConnectorUDP::send_package(datagram package)
 {
+	package.is_from_master = false;
 	if(package.type == datagram_type::control) {
 
 		package.control.package_id = ++lastSentPackageId;

@@ -67,6 +67,7 @@ void Server::process_incoming_message()
 		auto client_id = addr.sin_addr.s_addr;
 		printf("Received package from %d:\n%s\n", client_id, stringifier.stringify(package).c_str());
 		
+		printf("Server is leader, forwarding packages to replcias\n");
 		if (is_leader)
 		{
 			// Send message to every replica
@@ -89,6 +90,7 @@ void Server::process_incoming_message()
 		else
 		{
 			// Use the addr information from the original sender, not the master
+			printf("Server is not leader, using original sender information\n");
 			addr = package.original_sender;
 		}
 		
