@@ -18,11 +18,12 @@ typedef std::string user_t;
 class Server
 {
 public:
-    Server(int port, std::string base_path);
-    Server(int port, std::string base_path, std::string ip, int portToConnect);
+    Server(std::string local_ip, int port, std::string base_path);
+    Server(std::string local_ip, int port, std::string base_path, std::string ip, int portToConnect);
     void run();
 
 private:
+    std::string local_ip;
     int port;
     std::string work_path;
 

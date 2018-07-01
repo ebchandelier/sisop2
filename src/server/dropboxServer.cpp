@@ -4,14 +4,15 @@ int main(int argc, char **argv)
 {
 	printf("Initializing server...\n");
 	int port;
+	std::string local_ip;
 	std::string dir;
 	std::string serverIpOfOneOfTheGroups = "NOPE";
 	int serverPort = -1;
 
-	if(argc < 5) 
+	if(argc < 7) 
 	{
 		printf("How to use:\n");
-		printf("dropboxServer -p <port> -d <working dir> -s <ip of another server> <port of that server>\n");
+		printf("dropboxServer -i <this machine's local ip> -p <port> -d <working dir> -s <ip of another server> <port of that server>\n");
 		exit(1);
 	}
     for(int i = 1; i < argc; i++) 
@@ -20,6 +21,10 @@ int main(int argc, char **argv)
 		{
 			switch(argv[i][1]) 
 			{
+				case 'i':
+					i++;
+					local_ip = argv[i];
+				break;
 				case 'p':
 					i++;
 					port = atoi(argv[i]);
@@ -55,10 +60,10 @@ int main(int argc, char **argv)
 	
 	if(serverIpOfOneOfTheGroups == "NOPE" || serverPort == -1) {
 		
-		Server(port, dir).run();
+		Server(local_ip, port, dir).run();
 
 	} else {
 
-		Server(port, dir, serverIpOfOneOfTheGroups, serverPort).run();
+		Server(local_ip, port, dir, serverIpOfOneOfTheGroups, serverPort).run();
 	}
 }

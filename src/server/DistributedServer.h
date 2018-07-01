@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+#include <string>
 #include <mutex>
 
 #include <unistd.h>
@@ -17,7 +17,7 @@
 #include <netdb.h> 
 #include <fcntl.h>
 
-#include<thread>
+#include <thread>
 
 #include "./../shared/datagram.h"
 
@@ -25,7 +25,7 @@ class DistributedServer
 {
 public:
 
-    DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection);
+    DistributedServer(std::string local_ip, int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection);
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);
@@ -40,7 +40,7 @@ public:
     bool *is_leader = nullptr;
 
 private:
-
+    std::string local_ip;
     int port;
     int basePort;
     std::vector<PROCESS_PATH> *ipPortConnectListPointer;

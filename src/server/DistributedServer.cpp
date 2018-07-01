@@ -2,10 +2,10 @@
 
 #define BUFFERSIZE 1024
 
-DistributedServer::DistributedServer(int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection) {
+DistributedServer::DistributedServer(std::string local_ip, int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection) {
 
     std::unique_lock<std::mutex> mlock(mutex_constructor);
-
+    this->local_ip = local_ip;
     this->basePort = port;
 
     this->threadCounter = threadCount;
@@ -230,7 +230,7 @@ void DistributedServer::communicate(int socket, int indexAdded) {
                 int currentSize = this->ipPortConnectListPointer->size();
 
                 std::thread([&, type_response]() {
-		            DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+		            DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
                 }).detach();
                 
                 while(currentSize == this->ipPortConnectListPointer->size());
@@ -322,18 +322,17 @@ void DistributedServer::waitNewConnection() {
 	if ((newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) == -1) 
 		printf("ERROR on accept");
 
-
     PROCESS_PATH anotherProcessPath;
     read(newsockfd, &anotherProcessPath, sizeof(PROCESS_PATH));
 
-    PROCESS_PATH thisProcessPath = buildProcessPath("YOU KNOW", 666, getpid()); // send just the pid
+    PROCESS_PATH thisProcessPath = buildProcessPath(local_ip, port, getpid());
     write(newsockfd, &thisProcessPath, sizeof(PROCESS_PATH));
 
     fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     fcntl(newsockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     
     std::thread([&]() {
-        DistributedServer(basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).waitNewConnection();
+        DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).waitNewConnection();
     }).detach();
 
     int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
