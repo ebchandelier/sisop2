@@ -74,7 +74,11 @@ void Server::process_incoming_message()
 				datagram forwarded_package = package;
 				forwarded_package.is_from_master = true;
 				forwarded_package.original_sender = addr;
-				printf("TODO: Sending package to replica %s : %d\n", replica.ip, replica.port);
+				printf("ipPortConnectedList %s : %d\n", replica.ip, replica.port);
+			}
+			for (auto& replica: shouldWarn)
+			{
+				printf("ShouldWarn %s : %d\n", replica.ip_port.ip, replica.ip_port.port);
 			}
 		}
 		else
