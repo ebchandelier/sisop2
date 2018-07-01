@@ -392,7 +392,7 @@ void DistributedServer::connectWith(std::string ip, int port) {
 
         fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
 
-        int indexAdded = this->addCommunication(ip, port, anotherProcessPath.pid);
+        int indexAdded = this->addCommunication(anotherProcessPath.ip, anotherProcessPath.port, anotherProcessPath.pid);
 
         this->communicate(sockfd, indexAdded);
 
