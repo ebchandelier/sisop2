@@ -25,7 +25,7 @@ class DistributedServer
 {
 public:
 
-    DistributedServer(std::string local_ip, int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection);
+    DistributedServer(std::string local_ip, int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection, bool *is_leader);
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);

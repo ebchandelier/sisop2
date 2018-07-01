@@ -2,11 +2,12 @@
 
 #define BUFFERSIZE 1024
 
-DistributedServer::DistributedServer(std::string local_ip, int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection) {
+DistributedServer::DistributedServer(std::string local_ip, int port, std::vector<PROCESS_PATH> *ipPortConnectedList, std::vector<TYPE> *communicationVector, int *threadCount, int *elected, bool *fightingForElection, bool *is_leader) {
 
     std::unique_lock<std::mutex> mlock(mutex_constructor);
     this->local_ip = local_ip;
     this->basePort = port;
+    this->is_leader = is_leader;
 
     this->threadCounter = threadCount;
 
@@ -230,7 +231,7 @@ void DistributedServer::communicate(int socket, int indexAdded) {
                 int currentSize = this->ipPortConnectListPointer->size();
 
                 std::thread([&, type_response]() {
-		            DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+		            DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection, is_leader).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
                 }).detach();
                 
                 while(currentSize == this->ipPortConnectListPointer->size());
@@ -332,7 +333,7 @@ void DistributedServer::waitNewConnection() {
     fcntl(newsockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
     
     std::thread([&]() {
-        DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection).waitNewConnection();
+        DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection, is_leader).waitNewConnection();
     }).detach();
 
     int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);

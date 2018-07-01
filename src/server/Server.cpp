@@ -6,9 +6,7 @@ Server::Server(std::string local_ip, int port, std::string base_path) : outgoing
 	this->work_path = base_path + "/sync_dir";
 
 	std::thread([&, port]() {
-		DistributedServer* distributed_server = new DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection);
-		distributed_server->is_leader = &is_leader;
-		distributed_server->waitNewConnection();
+		DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection, &is_leader).waitNewConnection();
     }).detach();
 }
 
@@ -21,13 +19,13 @@ Server::Server(std::string local_ip, int port, std::string base_path, std::strin
 	int currentSizeConnected = this->ipPortConnectedList.size();
 
 	std::thread([&, port, ip, portToConnect]() {
-		DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection).connectWith(ip, portToConnect);
+		DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection, &is_leader).connectWith(ip, portToConnect);
     }).detach();
 
 	while(this->ipPortConnectedList.size()==currentSizeConnected);
 
 	std::thread([&, port]() {
-		DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection).waitNewConnection();
+		DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection, &is_leader).waitNewConnection();
     }).detach();
 }
 
@@ -67,9 +65,9 @@ void Server::process_incoming_message()
 		auto client_id = addr.sin_addr.s_addr;
 		printf("Received package from %d:\n%s\n", client_id, stringifier.stringify(package).c_str());
 		
-		printf("Server is leader, forwarding packages to replcias\n");
 		if (is_leader)
 		{
+			printf("Server is leader, forwarding packages to replcias:\n");
 			// Send message to every replica
 			for (auto& replica: ipPortConnectedList)
 			{

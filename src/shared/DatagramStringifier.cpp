@@ -20,11 +20,11 @@ std::string DatagramStringifier::stringify(datagram package)
 
     if (package.is_from_master)
     {
-        out += "From master: No\n";
+        out += "From master: Yes\n";
     }
     else
     {
-        out += "From master: Yes\n";
+        out += "From master: No\n";
     }
 
     if (package.type == datagram_type::control)
