@@ -75,6 +75,7 @@ bool ServerConnectorUDP::has_new_package(bool with_ack)
 	if(0 <= recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &cli_addr, &clilen)){
 
 		if (!with_ack) {
+			new_package = true;
 			return new_package;
 		}
 		if(package.type == datagram_type::control) {
