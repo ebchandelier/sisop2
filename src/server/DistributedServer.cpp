@@ -39,12 +39,13 @@ bool isNullPath(PROCESS_PATH pp) {
     return false;
 }
 
-PROCESS_PATH buildProcessPath(std::string ip, int port, int pid) {
+PROCESS_PATH buildProcessPath(std::string ip, int portTCP, int portUDP, int pid) {
 
     PROCESS_PATH pp;
 
     memcpy(pp.ip, (ip+"            ").c_str(), 15);
-    pp.port = port;
+    pp.portTCP = portTCP;
+    pp.portUDP = portUDP;
     pp.pid = pid;
 
     return pp;
@@ -105,7 +106,7 @@ void DistributedServer::warnEveryProcessAboutMyConnectedProcess(std::string ip, 
     for(int i=0; i < this->ipPortConnectListPointer->size()-1; i++) {
 
         TYPE type = buildCommandType(control_type::action_add_ip_port);
-        type.ip_port = buildProcessPath(ip, basePort + i + 1, pid);
+        type.ip_port = buildProcessPath(ip, basePort + i + 1, basePort, pid);
 
         this->communicationVector->at(i) = type;
     }
@@ -231,7 +232,7 @@ void DistributedServer::communicate(int socket, int indexAdded) {
                 int currentSize = this->ipPortConnectListPointer->size();
 
                 std::thread([&, type_response]() {
-		            DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection, is_leader).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.port);
+		            DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection, is_leader).connectWith(std::string(type_response.ip_port.ip), type_response.ip_port.portTCP);
                 }).detach();
                 
                 while(currentSize == this->ipPortConnectListPointer->size());
@@ -277,13 +278,13 @@ std::string cleanUpIp(std::string ip) {
     return result;
 }
 
-int DistributedServer::addCommunication(std::string ip, int port, int pid) {
+int DistributedServer::addCommunication(std::string ip, int portTCP, int portUDP, int pid) {
 
     std::unique_lock<std::mutex> mlock(mutex_add_communication);
 
     ip = cleanUpIp(ip);
 
-    PROCESS_PATH processPath = buildProcessPath(ip, port, pid);
+    PROCESS_PATH processPath = buildProcessPath(ip, portTCP, portUDP, pid);
 
     this->ipPortConnectListPointer->push_back(processPath);
     this->communicationVector->push_back(getNullCommandType());
@@ -291,7 +292,7 @@ int DistributedServer::addCommunication(std::string ip, int port, int pid) {
     std::cout << "\n\nAdded comunication, now talking with:\n";
     for(auto processPath : *this->ipPortConnectListPointer) {
 
-        std::cout << "ip: " << processPath.ip << ", port: " << processPath.port << " pid:" << processPath.pid << "\n";
+        std::cout << "ip: " << processPath.ip << ", port: " << processPath.portTCP << " pid:" << processPath.pid << "\n";
     }
 
     return this->ipPortConnectListPointer->size()-1; //index in which it was added 
@@ -326,7 +327,7 @@ void DistributedServer::waitNewConnection() {
     PROCESS_PATH anotherProcessPath;
     read(newsockfd, &anotherProcessPath, sizeof(PROCESS_PATH));
 
-    PROCESS_PATH thisProcessPath = buildProcessPath(local_ip, port, getpid());
+    PROCESS_PATH thisProcessPath = buildProcessPath(local_ip, this->port, this->basePort, getpid());
     write(newsockfd, &thisProcessPath, sizeof(PROCESS_PATH));
 
     fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
@@ -336,9 +337,9 @@ void DistributedServer::waitNewConnection() {
         DistributedServer(local_ip, basePort, ipPortConnectListPointer, communicationVector, threadCounter, elected, fightingForElection, is_leader).waitNewConnection();
     }).detach();
 
-    int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
+    int indexAdded = this->addCommunication(std::string(anotherProcessPath.ip), anotherProcessPath.portTCP, anotherProcessPath.portUDP, anotherProcessPath.pid);
 
-    this->warnEveryProcessAboutMyConnectedProcess(std::string(anotherProcessPath.ip), anotherProcessPath.port, anotherProcessPath.pid);
+    this->warnEveryProcessAboutMyConnectedProcess(std::string(anotherProcessPath.ip), anotherProcessPath.portTCP, anotherProcessPath.pid);
 
     this->communicate(newsockfd, indexAdded);
 
@@ -384,7 +385,7 @@ void DistributedServer::connectWith(std::string ip, int port) {
             continue;
         }
 
-        PROCESS_PATH thisProcessPath = buildProcessPath(ip, this->port, getpid()); // provavel treta no ip....
+        PROCESS_PATH thisProcessPath = buildProcessPath(ip, this->port, this->basePort, getpid()); // provavel treta no ip....
         write(sockfd, &thisProcessPath, sizeof(PROCESS_PATH));
 
         PROCESS_PATH anotherProcessPath;
@@ -392,7 +393,7 @@ void DistributedServer::connectWith(std::string ip, int port) {
 
         fcntl(sockfd, F_SETFL, O_NONBLOCK); /* Change the socket into non-blocking state	*/
 
-        int indexAdded = this->addCommunication(anotherProcessPath.ip, anotherProcessPath.port, anotherProcessPath.pid);
+        int indexAdded = this->addCommunication(anotherProcessPath.ip, anotherProcessPath.portTCP, anotherProcessPath.portUDP, anotherProcessPath.pid);
 
         this->communicate(sockfd, indexAdded);
 

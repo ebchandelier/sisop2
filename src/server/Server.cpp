@@ -69,9 +69,10 @@ void Server::process_incoming_message()
 		{
 			printf("Server is leader, forwarding packages to replcias:\n");
 			// Send message to every replica
+
 			for (auto& replica: ipPortConnectedList)
 			{
-				printf("Master forwarding package to RM %s : %d\n", replica.ip, replica.port - 1);
+				printf("Master forwarding package to RM %s : %d\n", replica.ip, replica.portUDP);
 				// Build forwarded package
 				datagram forwarded_package = package;
 				forwarded_package.is_from_master = true;
@@ -79,7 +80,7 @@ void Server::process_incoming_message()
 				// Build replica sockaddr_in
 				sockaddr_in replica_addr;
 				replica_addr.sin_family = AF_INET;
-				replica_addr.sin_port = htons(replica.port - 1);
+				replica_addr.sin_port = htons(replica.portUDP);
 				replica_addr.sin_addr.s_addr = inet_addr(replica.ip);
 				// Send package
 				connector.send_package(forwarded_package, replica_addr);

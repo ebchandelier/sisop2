@@ -147,7 +147,8 @@ typedef struct
 //DEFS FOR MULTISERVER
 typedef struct {
     char ip[15];
-    int port;
+    int portTCP;
+    int portUDP;
     int pid;
 } PROCESS_PATH;
 

@@ -29,7 +29,7 @@ public:
     void waitNewConnection();
     void connectWith(std::string ip, int port);
     // std::string receive(int socket, int bufferSize);
-    int addCommunication(std::string ip, int port, int pid);
+    int addCommunication(std::string ip, int portTCP, int portUDP, int pid);
     void warnEveryProcessAboutMyConnectedProcess(std::string ip, int basePort, int pid);
     void communicate(int socket, int indexAdded);
     bool contains(int pid);
