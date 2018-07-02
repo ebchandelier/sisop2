@@ -90,9 +90,9 @@ void Server::process_incoming_message()
 		}
 		else
 		{
-			// Use the addr information from the original sender, not the master
+			// Use the client_id information from the original sender, not the master
 			printf("Server is not leader, using original sender information\n");
-			addr = package.original_sender;
+			client_id = package.original_sender.sin_addr.s_addr;
 		}
 		
 		// If this is a package from a new device
