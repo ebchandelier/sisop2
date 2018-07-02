@@ -5,6 +5,8 @@ Server::Server(std::string local_ip, int port, std::string base_path) : outgoing
     this->port = port;
 	this->work_path = base_path + "/sync_dir";
 
+	this->is_leader = true;
+
 	std::thread([&, port]() {
 		DistributedServer(local_ip, port, &ipPortConnectedList, &shouldWarn, &threadCount, &elected, &fightingForElection, &is_leader).waitNewConnection();
     }).detach();
@@ -70,7 +72,7 @@ void Server::process_incoming_message()
 			printf("Server is leader, forwarding packages to replcias:\n");
 			// Send message to every replica
 
-			for (auto& replica: ipPortConnectedList)
+			for (auto replica: this->ipPortConnectedList)
 			{
 				printf("Master forwarding package to RM %s : %d\n", replica.ip, replica.portUDP);
 				// Build forwarded package
