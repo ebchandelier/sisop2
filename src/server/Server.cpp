@@ -58,7 +58,7 @@ void Server::create_root_folder_if_needed()
 void Server::process_incoming_message()
 {
 	// If the connector has a new package available
-	if (connector.has_new_package()) 
+	if (connector.has_new_package(is_leader)) 
 	{
 		// Fetch it
 		auto package_and_addr = connector.receive_next_package_and_addr();
@@ -85,7 +85,7 @@ void Server::process_incoming_message()
 				replica_addr.sin_port = htons(replica.portUDP);
 				replica_addr.sin_addr.s_addr = inet_addr(replica.ip);
 				// Send package
-				connector.send_package(forwarded_package, replica_addr);
+				connector.send_package(forwarded_package, replica_addr, false);
 			}
 		}
 		else

@@ -22,13 +22,13 @@ public:
 	// Initializes a UDP connection on this port
 	void init(int port);
 
-	bool has_new_package();
+	bool has_new_package(bool with_ack = true);
 
 	// Blocking get the next package and return it with the sender information
 	std::pair<datagram, sockaddr_in> receive_next_package_and_addr();
 
 	// Send package to client at 'addr'
-	void send_package(datagram package, sockaddr_in addr);
+	void send_package(datagram package, sockaddr_in addr, bool with_ack = true);
 
 	// Closes this UDP connection
 	void close();

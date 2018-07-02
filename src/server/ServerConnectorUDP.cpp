@@ -33,7 +33,7 @@ void ServerConnectorUDP::init(int port)
 	clilen = sizeof(struct sockaddr_in);
 }
 
-void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr)
+void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr, bool with_ack)
 {
 	if(package.type == datagram_type::control) {
 
@@ -48,7 +48,9 @@ void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr)
 	while(true) {
 
 		if(0 <= sendto(sockfd, &package, DATAGRAM_SIZE, 0,(struct sockaddr *) &addr, sizeof(struct sockaddr))) {
-
+			if (!with_ack) {
+				return;
+			}
 			datagram possibleAck;
 			if(0 <= recvfrom(sockfd, &possibleAck, DATAGRAM_SIZE, 0, (struct sockaddr *) &cli_addr, &clilen)) {
 
@@ -66,12 +68,15 @@ void ServerConnectorUDP::send_package(datagram package, sockaddr_in addr)
 	}
 }
 
-bool ServerConnectorUDP::has_new_package()
+bool ServerConnectorUDP::has_new_package(bool with_ack)
 {
 	new_package = false;
 	
 	if(0 <= recvfrom(sockfd, &package, DATAGRAM_SIZE, 0, (struct sockaddr *) &cli_addr, &clilen)){
 
+		if (!with_ack) {
+			return new_package;
+		}
 		if(package.type == datagram_type::control) {
 
 			if(package.control.package_id != getLastPackageReceivedOfClient(cli_addr)) {
